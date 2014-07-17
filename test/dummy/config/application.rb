@@ -3,7 +3,7 @@ require File.expand_path('../boot', __FILE__)
 require 'rails/all'
 
 Bundler.require(*Rails.groups)
-require "serializer_binary"
+require "active_model_serializers_binary"
 
 module Dummy
   class Application < Rails::Application

@@ -1,9 +1,5 @@
-#require 'active_support/core_ext/module/attribute_accessors'
-#require 'active_support/core_ext/array/conversions'
-#require 'active_support/core_ext/hash/conversions'
-#require 'active_support/core_ext/hash/slice'
-#require 'active_support/core_ext/time/acts_like'
 require 'active_model'
+require 'active_support/core_ext/object' # Helpers para los objetos (instance_values, etc.)
 require_relative 'data_types'
 
 module ActiveModel
@@ -34,22 +30,6 @@ module ActiveModel
           @serializable = serializable
           @options = options ? options.dup : {}
         end
-
-        # def serializable_hash
-        #   @serializable.serializable_hash(@options.except(:include))
-        # end
-
-        # def serializable_collection
-        #   methods = Array(options[:methods]).map(&:to_s)
-        #   serializable_hash.map do |name, value|
-        #     name = name.to_s
-        #     if methods.include?(name)
-        #       self.class::MethodAttribute.new(name, @serializable, value)
-        #     else
-        #       self.class::Attribute.new(name, @serializable, value)
-        #     end
-        #   end
-        # end
 
         def dump
           serializable_values = @serializable.serializable_hash(options)
@@ -100,10 +80,10 @@ module ActiveModel
         def load (buffer=[])
           serialized_values = {}
           start_address = @options[:start_address] || 0
-          
+
           buffer ||= [] # Buffer en bytes
           tmp_buffer = [] # Buffer temporal en bytes
-          
+
           current_address = start_address*2 + 0.0 # Dirección en bytes
 
           @serializable.attr_config.each do |key, value|

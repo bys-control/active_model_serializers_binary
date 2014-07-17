@@ -1,5 +1,5 @@
-#require 'active_support/core_ext/object'
-require 'serializer_binary/serializer_binary'
+require 'active_model_serializers_binary/active_model_serializers_binary'
+require 'colorize'
 
 class Producto
 	include ActiveModel::Serializers::Binary
@@ -24,7 +24,7 @@ class Producto
 	 	@start_address = 0
 	 	@id = 1
 	 	@silo = 0
-	 	@nombre = ["MAIZ", "EXPELLER"]
+	 	@nombre = "MAIZ"
 	 	@total_acumulado = 50
 	 	@bits1 = 1
 	 	@bits2 = 1
@@ -33,24 +33,15 @@ class Producto
 	end
 end
 
-# producto = Producto.new
-# producto.id.value = 1
-# producto.silo.value = 0
-# producto.nombre.value = ['MAIZ']
-# producto.total_acumulado.value = 50
-# producto.bits1.value = [1,1,0,1,0,0,1,1,1]
-# producto.bits2.value = [1,1,0,1,0,0,1,1,1]
-# producto.total_acumulado_1.value = 20
-# producto.float.value = 1.2345678
+orig = Producto.new
 
-# puts 'Datos originales...'
-# puts producto.instance_variables.map{|var| producto.instance_variable_get(var)}.select{|v| defined? v.load}
+puts 'Datos originales...'
+puts orig.inspect.green
 
-# puts 'serializando...'
-# ser = producto.serialize
-# puts ser.inspect
+puts 'serializando...'
+serial = orig.to_bytes
+puts serial.inspect.yellow
 
-# puts 'deserializando...'
-# deser = producto.deserialize(ser)
-# puts deser
-
+puts 'deserializando...'
+deser = Producto.new.from_bytes(serial)
+puts deser.inspect.green

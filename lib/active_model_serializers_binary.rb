@@ -1,0 +1,1 @@
+require 'active_model_serializers_binary/active_model_serializers_binary'
