@@ -6,7 +6,7 @@ require "active_model_serializers_binary/version"
 # Describe your gem and declare its dependencies:
 Gem::Specification.new do |s|
   s.name        = "active_model_serializers_binary"
-  s.version     = SerializerBinary::VERSION
+  s.version     = ActiveModelSerializersBinary::VERSION
   s.authors     = ["Guillermo Bisheimer"]
   s.email       = ["gbisheimer@bys-control.com.ar"]
   s.homepage    = "http://www.bys-control.com.ar"

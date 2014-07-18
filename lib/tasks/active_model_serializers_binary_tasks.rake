@@ -1,4 +1,4 @@
 # desc "Explaining what the task does"
-# task :serializer_binary do
+# task :active_model_serializers_binary do
 #   # Task goes here
 # end
