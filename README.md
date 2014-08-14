@@ -1,29 +1,17 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+Serializador/Deserializador de bytes en Ruby
 
-### What is this repository for? ###
+* La Serialización se realiza a partir de una instancia de un objeto para el cual se declaran los tipos para cada uno de los atributos.
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+* La deserialización convierte un array de bytes al objeto definido.
 
-### How do I get set up? ###
+### Ejemplos de uso ###
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
 
-### Contribution guidelines ###
+```
+#!ruby
 
-* Writing tests
-* Code review
-* Other guidelines
+test/dummy/lib/test_parser.rb
 
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+```
