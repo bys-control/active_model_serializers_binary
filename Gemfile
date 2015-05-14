@@ -12,3 +12,13 @@ gemspec
 
 # To use debugger
 # gem 'debugger'
+
+group :development do
+  gem 'pry'
+  gem 'pry-rescue'
+  gem 'pry-doc'
+  gem 'pry-rails'
+
+  #debuggers
+  gem 'pry-byebug'
+end
