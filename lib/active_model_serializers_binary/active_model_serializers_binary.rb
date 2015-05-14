@@ -48,21 +48,25 @@ module ActiveModel
             bit = (current_address.modulo(1)*8).round
 
             tmp_buffer = var.dump
-            # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-            if var.bit_length > 8 and current_address.modulo(2) != 0
-              byte += 1
-              bit = 0
-            end
-            # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-            if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
-              byte += 4-byte%4
-              bit = 0
+
+            if @options[:align]
+              # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
+              if var.bit_length > 8 and current_address.modulo(2) != 0
+                byte += 1
+                bit = 0
+              end
+              # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
+              if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
+                byte += 4-byte%4
+                bit = 0
+              end
             end
 
             # Si los datos ocupan mas de un byte concatena los arrays
-            if var.bit_length >= 8
+            if var.bit_length >= 8 and @options[:align]
               buffer.insert(byte, tmp_buffer).flatten!
             else # En caso de ser bits
+              tmp_buffer.flatten!
               tmp_bits=tmp_buffer.pack('C*').unpack('b*').first.slice(0,var.size*8)
               tmp_buffer=[tmp_bits.rjust(tmp_bits.length+bit,'0')].pack('b*').unpack('C*')
 
@@ -93,19 +97,21 @@ module ActiveModel
 
             var = value[:coder].new(value[:count], value[:length]) #creo objeto del tipo de dato pasado
 
-            # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-            if var.bit_length > 8 and current_address.modulo(2) != 0
-              byte += 1
-              bit = 0
-            end
-            # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-            if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
-              byte += 4-byte%4
-              bit = 0
+            if @options[:align]
+              # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
+              if var.bit_length > 8 and current_address.modulo(2) != 0
+                byte += 1
+                bit = 0
+              end
+              # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
+              if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
+                byte += 4-byte%4
+                bit = 0
+              end
             end
 
             # Si los datos ocupan mas de un byte, obtiene los bytes completos del buffer original
-            if var.bit_length >= 8
+            if var.bit_length >= 8 and @options[:align]
               result_deserialized=var.load(buffer.slice(byte, var.size))
             else # En caso de ser bits
               tmp_buffer = buffer.slice(byte, var.size.ceil)
@@ -116,9 +122,9 @@ module ActiveModel
             current_address = (byte+bit/8.0)+var.size
           end
 
-          if !@serializable.instance_variable_get(:@attributes).nil?
-            @serializable.instance_variable_get(:@attributes).merge!(serialized_values) rescue nil
-          else
+          # if !@serializable.instance_variable_get(:@attributes).nil?
+          #   @serializable.instance_variable_get(:@attributes).merge!(serialized_values) rescue nil
+          # else
             serialized_values.each do |k,v|
               if @serializable.methods.include? "#{k}=".to_sym
                 @serializable.send("#{k}=".to_sym, v)
@@ -126,7 +132,7 @@ module ActiveModel
                 @serializable.instance_variable_set("@#{k}", v)
               end
             end
-          end
+          #end
 
           @serializable
         end
