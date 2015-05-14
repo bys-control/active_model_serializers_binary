@@ -4,11 +4,19 @@ require 'colorize'
 class Producto
 	include ActiveModel::Serializers::Binary
 
-	attr_accessor :start_address, :id, :silo, :nombre, :total_acumulado, :bits1, :bits2, :float, :total_acumulado_1
+	attr_accessor :start_address, :id, :silo, :nombre, :total_acumulado, :bits1, :bits2, :float, :total_acumulado_1, :variable
 
     def attributes
-    	instance_values
+    	instance_values.merge({"metodo" => self.metodo})
     end
+
+	def metodo
+		self.instance_variable_get("@variable")
+	end
+
+	def metodo= (value)
+		self.instance_variable_set("@variable", value)
+	end
 
 	# Formato atributo, Coder, Count, Length
 	serialize_options :id, Int16
@@ -19,6 +27,7 @@ class Producto
 	serialize_options :bits2, Bool, 1
 	serialize_options :total_acumulado_1, Int32
 	serialize_options :float, Float32
+	serialize_options :metodo, Char, 1, 20
 
 	def initialize
 	 	@start_address = 0
@@ -30,6 +39,7 @@ class Producto
 	 	@bits2 = 1
 	 	@total_acumulado_1 = 20
 	 	@float= 1.2345678
+	 	@variable = "metodo"
 	end
 end
 
