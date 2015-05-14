@@ -164,7 +164,7 @@ module ActiveModel
       # To include associations use <tt>:include</tt>.
       #
       # For further documentation, see <tt>ActiveRecord::Serialization#to_xml</tt>
-      def to_bytes(options = {})
+      def to_bytes(options = {:align => true})
         Serializer.new(self, options).dump
       end
 
@@ -192,7 +192,7 @@ module ActiveModel
       #   person.name          # => "bob"
       #   person.age           # => 22
       #   person.awesome       # => true
-      def from_bytes(buffer, options = {})
+      def from_bytes(buffer, options = {:align => true})
         Serializer.new(self, options).load buffer
       end
     end

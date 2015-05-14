@@ -49,11 +49,9 @@ puts 'Datos originales...'
 puts orig.inspect.green
 
 puts 'serializando...'
-serial = orig.to_bytes({:align => false})
+serial = orig.to_bytes
 puts serial.inspect.yellow
 
 puts 'deserializando...'
-deser = Producto.new.from_bytes(serial, {:align => false})
+deser = Producto.new.from_bytes(serial)
 puts deser.inspect.green
-
-#[1, 0, 0, 0, 77, 65, 73, 90, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 3, 0, 0, 0, 20, 0, 0, 0, 81, 6, 158, 63, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48]
