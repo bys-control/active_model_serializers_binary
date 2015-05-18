@@ -122,17 +122,17 @@ module ActiveModel
             current_address = (byte+bit/8.0)+var.size
           end
 
-          # if !@serializable.instance_variable_get(:@attributes).nil?
-          #   @serializable.instance_variable_get(:@attributes).merge!(serialized_values) rescue nil
-          # else
-            serialized_values.each do |k,v|
-              if @serializable.methods.include? "#{k}=".to_sym
-                @serializable.send("#{k}=".to_sym, v)
-              else
-                @serializable.instance_variable_set("@#{k}", v)
-              end
-            end
+          #if !@serializable.instance_variable_get(:@attributes).nil?
+          #  @serializable.instance_variable_get(:@attributes).merge!(serialized_values) rescue nil
           #end
+
+          serialized_values.each do |k,v|
+            if @serializable.attributes.key?(k) or @serializable.methods.include? "#{k}=".to_sym
+              @serializable.send("#{k}=", v)
+            else
+              @serializable.instance_variable_set("@#{k}", v) unless @serializable.instance_variable_get(:@attributes).include? k
+            end
+          end
 
           @serializable
         end
