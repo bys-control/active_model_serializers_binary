@@ -79,11 +79,11 @@ module DataTypes
 
     def dump(value=nil)
       self.value = value if !value.nil?
-      @value.pack('v*').unpack('C*')
+      @value.pack('v*').unpack('s*')
     end
 
     def load(value)
-      self.value = value.pack('C*').unpack('v*') if !value.nil?
+      self.value = value.pack('s*').unpack('v*') if !value.nil?
       @value
     end
   end
