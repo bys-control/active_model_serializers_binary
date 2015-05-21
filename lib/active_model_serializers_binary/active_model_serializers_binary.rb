@@ -133,7 +133,6 @@ module ActiveModel
               end
             end
           #end
-
           @serializable
         end
 

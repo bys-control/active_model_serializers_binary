@@ -79,11 +79,11 @@ module DataTypes
 
     def dump(value=nil)
       self.value = value if !value.nil?
-      @value.pack('v*').unpack('s*')
+      @value.pack('v*').unpack('C*')
     end
 
     def load(value)
-      self.value = value.pack('s*').unpack('v*') if !value.nil?
+      self.value = value.pack('C*').unpack('v*') if !value.nil?
       @value
     end
   end
@@ -130,11 +130,11 @@ module DataTypes
 
     def dump(value=nil)
       self.value = value if !value.nil?
-      @value.pack('V*').unpack('C*')
+      @value.pack('l*').unpack('C*')
     end
 
     def load(value)
-      self.value = value.pack('C*').unpack('V*') if !value.nil?
+      self.value = value.pack('C*').unpack('l*') if !value.nil?
       @value
     end
   end
@@ -176,7 +176,7 @@ module DataTypes
     end
 
     def load(value)
-      self.value = value.pack('C*').scan(/.{1,#{@length}}/).map!{|a| a.scan(/[[:print:]]+/).first} if !value.nil?
+      self.value = value.pack('C*').unpack("A#{@length}") if !value.nil?
       @value
     end
   end
