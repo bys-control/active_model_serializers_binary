@@ -126,10 +126,10 @@ module ActiveModel
           #   @serializable.instance_variable_get(:@attributes).merge!(serialized_values) rescue nil
           # else
             serialized_values.each do |k,v|
-              if @serializable.methods.include? "#{k}=".to_sym
-                @serializable.send("#{k}=".to_sym, v)
+              if @serializable.respond_to? "#{k}="
+                @serializable.send("#{k}=", v)
               else
-                @serializable.instance_variable_set("@#{k}", v)
+                @serializable.instance_variable_set("@#{k}".to_sym, v)
               end
             end
           #end
