@@ -176,7 +176,7 @@ module DataTypes
     end
 
     def load(value)
-      self.value = value.pack('C*').unpack("A#{@length}") if !value.nil?
+      self.value = value.pack('C*').unpack("Z#{@length}") if !value.nil?
       @value
     end
   end
