@@ -163,7 +163,15 @@ module ActiveModel
       # To include associations use <tt>:include</tt>.
       #
       # For further documentation, see <tt>ActiveRecord::Serialization#to_xml</tt>
-      def to_bytes(options = {:align => true})
+      def to_bytes(buffer, options = {}, &block)
+        default_options = {
+            :align => true,
+            :block => block
+        }
+        options = default_options.deep_merge(options)
+        if !options[:block].blank?
+            instance_exec(item, &options[:block])
+        end
         Serializer.new(self, options).dump
       end
 
@@ -191,8 +199,17 @@ module ActiveModel
       #   person.name          # => "bob"
       #   person.age           # => 22
       #   person.awesome       # => true
-      def from_bytes(buffer, options = {:align => true})
+      def from_bytes(buffer, options = {}, &block)
+        default_options = {
+            :align => true,
+            :block => block
+        }
+        options = default_options.deep_merge(options)
         Serializer.new(self, options).load buffer
+        
+        if !options[:block].blank?
+            instance_exec(item, &options[:block])
+        end
       end
     end
   end
