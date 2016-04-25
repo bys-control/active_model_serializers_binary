@@ -1,4 +1,6 @@
-# README #
+# Active model serializers binary #
+
+[![Gem Version](https://badge.fury.io/rb/active_model_serializers_binary.svg)](https://badge.fury.io/rb/active_model_serializers_binary)
 
 Serializador/Deserializador de bytes en Ruby
 
