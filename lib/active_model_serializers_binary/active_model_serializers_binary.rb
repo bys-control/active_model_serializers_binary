@@ -209,8 +209,8 @@ module ActiveModel
         
         if !options[:block].blank?
             instance_exec(self, &options[:block])
-            retVal
         end
+        retVal
       end
     end
   end
