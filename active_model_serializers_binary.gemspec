@@ -7,11 +7,11 @@ require "active_model_serializers_binary/version"
 Gem::Specification.new do |s|
   s.name        = "active_model_serializers_binary"
   s.version     = ActiveModelSerializersBinary::VERSION
-  s.authors     = ["Guillermo Bisheimer"]
-  s.email       = ["gbisheimer@bys-control.com.ar"]
-  s.homepage    = "http://www.bys-control.com.ar"
-  s.summary     = "Binary serializer for Active Model"
-  s.description = "Description"
+  s.authors     = ["ByS Sistemas de Control"]
+  s.email       = ["info@bys-control.com.ar"]
+  s.homepage    = "https://github.com/bys-control/active_model_serializers_binary"
+  s.summary     = "Serialize models to/from binary format for raw data exchange"
+  s.description = "Binary serializer for Ruby Active Model"
   s.license     = "MIT"
 
   s.files = `git ls-files -z`.split("\x0")
