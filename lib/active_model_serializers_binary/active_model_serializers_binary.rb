@@ -32,6 +32,7 @@ module ActiveModel
         end
 
         def dump
+          binding.pry
           serializable_values = @serializable.serializable_hash(options)
           start_address = @options[:start_address] || 0
 
@@ -50,20 +51,28 @@ module ActiveModel
             tmp_buffer = var.dump
 
             if @options[:align]
-              # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-              if var.bit_length > 8 and current_address.modulo(2) != 0
-                byte += 1
-                bit = 0
-              end
-              # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-              if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
-                byte += 4-byte%4
-                bit = 0
+              if !var.type.in? [:bitfield, :bool]
+                # Se posiciona al principio de un byte
+                if bit != 0
+                  byte += 1
+                  bit = 0
+                  current_address = (byte+bit/8.0)
+                end
+                # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
+                if var.bit_length > 8 and current_address.modulo(2) != 0
+                  byte += 1
+                  bit = 0
+                end
+                # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
+                if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
+                  byte += 4-byte%4
+                  bit = 0
+                end
               end
             end
 
             # Si los datos ocupan mas de un byte concatena los arrays
-            if var.bit_length >= 8 and @options[:align]
+            if !var.type.in? [:bitfield, :bool] and @options[:align]
               buffer.insert(byte, tmp_buffer).flatten!
             else # En caso de ser bits
               tmp_buffer.flatten!
@@ -98,15 +107,23 @@ module ActiveModel
             var = value[:coder].new(value[:count], value[:length]) #creo objeto del tipo de dato pasado
 
             if @options[:align]
-              # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-              if var.bit_length > 8 and current_address.modulo(2) != 0
-                byte += 1
-                bit = 0
-              end
-              # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-              if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
-                byte += 4-byte%4
-                bit = 0
+              if !var.type.in? [:bitfield, :bool]
+                # Se posiciona al principio de un byte
+                if bit != 0
+                  byte += 1
+                  bit = 0
+                  current_address = (byte+bit/8.0)
+                end
+                # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
+                if var.bit_length > 8 and current_address.modulo(2) != 0
+                  byte += 1
+                  bit = 0
+                end
+                # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
+                if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
+                  byte += 4-byte%4
+                  bit = 0
+                end
               end
             end
 
@@ -114,7 +131,7 @@ module ActiveModel
             if var.bit_length >= 8 and @options[:align]
               result_deserialized=var.load(buffer.slice(byte, var.size))
             else # En caso de ser bits
-              tmp_buffer = buffer.slice(byte, var.size.ceil)
+              tmp_buffer = buffer.slice(byte, (var.size+bit/8.0).ceil)
               result_deserialized=var.load([tmp_buffer.pack('C*').unpack('b*').first.slice(bit,var.size*8)].pack('b*').unpack('C*'))
             end
             # puts result_deserialized.inspect
