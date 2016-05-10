@@ -1,8 +1,9 @@
 module DataTypes
   class Type
-    attr_accessor :value, :bit_length
+    attr_accessor :value, :bit_length, :type
 
-    def initialize(bit_length=nil, sign=nil, count=1, length=1)
+    def initialize(type=nil, bit_length=nil, sign=nil, count=1, length=1)
+      @type = type
       @bit_length = bit_length
       @sign = sign
       @count = count
@@ -21,7 +22,7 @@ module DataTypes
 
     def check_value(value)
       if value.nil?
-        value=@value
+        value=0
       else
         value=(value.is_a? Array) ? value : [value]
       end
@@ -56,7 +57,7 @@ module DataTypes
 
   class Int8 < Type
     def initialize(count=1, length=1)
-      super 8, :signed, count
+      super :int8, 8, :signed, count
       self.value = @default_value
     end
 
@@ -73,7 +74,7 @@ module DataTypes
 
   class Int16 < Type
     def initialize(count=1, length=1)
-      super 16, :signed, count
+      super :int16, 16, :signed, count
       self.value = @default_value
     end
 
@@ -90,7 +91,7 @@ module DataTypes
 
   class Int32 < Type
     def initialize(count=1, length=1)
-      super 32, :signed, count
+      super :int32, 32, :signed, count
       self.value = @default_value
     end
 
@@ -107,7 +108,7 @@ module DataTypes
 
   class UInt16 < Type
     def initialize(count=1, length=1)
-      super 16, :unsigned, count
+      super :uint16, 16, :unsigned, count
       self.value = @default_value
     end
 
@@ -124,7 +125,7 @@ module DataTypes
 
   class UInt32 < Type
     def initialize(count=1, length=1)
-      super 32, :unsigned, count
+      super :uint32, 32, :unsigned, count
       self.value = @default_value
     end
 
@@ -141,7 +142,7 @@ module DataTypes
 
   class UInt8 < Type
     def initialize(count=1, length=1)
-      super 8, :unsigned, count
+      super :uint8, 8, :unsigned, count
       self.value = @default_value
     end
 
@@ -156,9 +157,29 @@ module DataTypes
     end
   end
 
+  class BitField < Type
+    def initialize(count=1, length=8)
+      length = 8 if length > 8
+      super :bitfield, length, :unsigned, count
+      @value = 0
+    end
+
+    def dump(value=nil)
+      @value = value if !value.nil?
+      data = @value.pack('C*').unpack('b*').first.chars.each_slice(8).map(&:join).map{|n| n.slice(0,bit_length)}
+      [data.join].pack('b*').unpack('C*')
+    end
+
+    def load(value)
+      #binding.pry
+      @value = value.pack('C*').unpack('b*').first.chars.slice(0,@bit_length*@count).each_slice(bit_length).map(&:join).map{|n| [n].pack('b*').unpack('C*').first}
+      @value
+    end
+  end
+
   class Char < Type
     def initialize(count=1, length=1)
-      super 8, nil, count, length
+      super :char, 8, nil, count, length
       @default_value = "\x0"
       self.value = @default_value
     end
@@ -183,7 +204,7 @@ module DataTypes
 
   class Bool < Type
     def initialize(count=1, length=1)
-      super 1, :unsigned, count
+      super :bool, 1, :unsigned, count
       self.value = 0
     end
 
@@ -200,7 +221,7 @@ module DataTypes
 
   class Float32 < Type
     def initialize(count=1, length=1)
-      super 32, nil, count
+      super :float32, 32, nil, count
       @default_value = 0.0
       self.value = @default_value
     end
