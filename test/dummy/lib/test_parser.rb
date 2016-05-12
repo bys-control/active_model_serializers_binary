@@ -34,39 +34,29 @@ class Producto
 	serialize_options :total_acumulado_1, Int32
 	serialize_options :float, Float32
 	serialize_options :variable, Char, 1, 20
-
-	def initialize
-	 	@start_address = 0
-	 	@id = 1
-	 	@silo = 0
-	 	@nombre = "MAIZ"
-	 	@total_acumulado = 50
-	 	@bits1 = 1
-	 	@bits2 = 1
-	 	@total_acumulado_1 = 20
-	 	@float= 1.2345678
-	 	@variable = '012345678901234567890123456789'
-	end
 end
 
+
 orig = Producto.new
+orig.start_address = 0
+orig.id = 1
+orig.silo = 0
+orig.nombre = "MAIZ"
+orig.total_acumulado = 50
+orig.bits1 = 1
+orig.bits2 = 1
+orig.total_acumulado_1 = 20
+orig.float= 1.2345678
+orig.variable = '012345678901234567890123456789'
 
 puts 'Datos originales...'
 puts orig.inspect.green
 
 puts 'serializando...'
-serial = orig.to_bytes do |b|
-	puts '@variable original: ', b.variable
-	b.variable = b.variable.map {|c| (c.ord+10).chr}
-	puts '@variable modificada: ', b.variable
-end
+serial = orig.to_bytes
 
 puts serial.inspect.yellow
 
 puts 'deserializando...'
-deser = Producto.new.from_bytes serial do |b|
-	puts 'datos leidos: ', b.variable
-	b.variable = b.variable.map {|c| (c.ord-10).chr}
-	puts 'datos modificados: ', b.variable
-end
+deser = Producto.new.from_bytes serial
 puts deser.inspect.green
