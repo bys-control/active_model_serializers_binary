@@ -26,13 +26,13 @@ class Producto
 
 	int16 :id
 	int16 :silo
-	char :nombre, 1, 20
+	char :nombre, count: 1, length: 20
 	int32 :total_acumulado
-	bool :bits1, 1
-	bool :bits2, 1
+	bool :bits1
+	bool :bits2
 	int32 :total_acumulado_1
 	float32 :float
-	char :variable, 1, 20
+	char :variable, count: 1, length: 20
 end
 
 

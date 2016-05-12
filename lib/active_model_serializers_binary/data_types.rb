@@ -1,21 +1,26 @@
 module DataTypes
   class Type
 
-    attr_accessor :value, :bit_length, :type
+    attr_accessor :value, :bit_length
 
-    def initialize(type=nil, bit_length=nil, sign=nil, count=1, length=1, default_value=0)
-      @default_value = default_value
+    def initialize(options = {})
+      @default_value = options[:default_value] || 0
       @raw_value = nil
-      @bit_length = bit_length
+      @bit_length = options[:bit_length]        # Cantidad de bits del tipo de dato
       @type = type
-      @sign = sign # :signed / :unsigned
-      @count = count # Cantidad de elementos del array
-      @length = length # En char y bitfield especifica la longitud del campo. Ignorado para el resto de los tipos
-      @value = check_value(default_value)
+      #@type = options[:type]                    # Nombre del tipo de dato
+      @sign = options[:sign]                    # :signed / :unsigned
+      @count = options[:count] || 1             # Cantidad de elementos del array
+      @length = options[:length]  || 1          # En char y bitfield especifica la longitud del campo. Ignorado para el resto de los tipos
+      @value = check_value( @default_value )
     end
 
     def to_s
       @value.to_s
+    end
+
+    def type
+      self.class.to_s.split('::').last.downcase.to_sym
     end
 
     # Return size of object in bytes
@@ -23,7 +28,14 @@ module DataTypes
       ((@bit_length*@length*@count)/8.0).ceil
     end
 
-    def check(type, count, length, bit_length, sign, default_value, value)
+    def check( value, options = {} )
+      type = options[:type]
+      count = options[:count]
+      length = options[:length]
+      bit_length = options[:bit_length]
+      sign = options[:sign]
+      default_value = options[:default_value]
+
       value = Array(value) # Se asegura de que sea un array
       value = value[0...count]  # Corta el array según la cantidad de elementos especificados en la declaración
       # Lo convierte al tipo especificado
@@ -47,12 +59,26 @@ module DataTypes
     end
 
     def check_value(value)
-      check(@type, @count, @length, @bit_length, @sign, @default_value, value)
+      check(value, {
+        :type => @type,
+        :count => @count,
+        :length => @length,
+        :bit_length => @bit_length,
+        :sign => @sign,
+        :default_value => @default_value,
+        })
     end
 
     # Los datos siempre vienen en bytes
     def check_raw_value(value)
-      check(:uint8, size, 1, 8, :unsigned, 0, value)
+      check(value, {
+        :type => :uint8,
+        :count => size,
+        :length => 1,
+        :bit_length => 8,
+        :sign => :unsigned,
+        :default_value => 0,
+        })
     end
 
     def trim(value, bit_length, sign)
@@ -74,8 +100,10 @@ module DataTypes
   end
 
   class Int8 < Type
-    def initialize(count=1, length=1)
-      super :int8, 8, :signed, count
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 8, :sign => :signed, :count => count
     end
 
     def dump(value=nil)
@@ -90,8 +118,10 @@ module DataTypes
   end
 
   class Int16 < Type
-    def initialize(count=1, length=1)
-      super :int16, 16, :signed, count
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 16, :sign => :signed, :count => count
     end
 
     def dump(value=nil)
@@ -106,8 +136,10 @@ module DataTypes
   end
 
   class Int32 < Type
-    def initialize(count=1, length=1)
-      super :int32, 32, :signed, count
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 32, :sign => :signed, :count => count
     end
 
     def dump(value=nil)
@@ -122,8 +154,10 @@ module DataTypes
   end
 
   class UInt16 < Type
-    def initialize(count=1, length=1)
-      super :uint16, 16, :unsigned, count
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 16, :sign => :unsigned, :count => count
     end
 
     def dump(value=nil)
@@ -139,8 +173,10 @@ module DataTypes
   end
 
   class UInt32 < Type
-    def initialize(count=1, length=1)
-      super :uint32, 32, :unsigned, count
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 32, :sign => :unsigned, :count => count
     end
 
     def dump(value=nil)
@@ -155,8 +191,10 @@ module DataTypes
   end
 
   class UInt8 < Type
-    def initialize(count=1, length=1)
-      super :uint8, 8, :unsigned, count
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 8, :sign => :unsigned, :count => count
     end
 
     def dump(value=nil)
@@ -173,7 +211,7 @@ module DataTypes
   class BitField < Type
     def initialize(count=1, length=8)
       length = 32 if length > 32
-      super :bitfield, length, :unsigned, count
+      super :bit_length => length, :sign => :unsigned, :count => count
     end
 
     def format
@@ -209,8 +247,10 @@ module DataTypes
   end
 
   class Char < Type
-    def initialize(count=1, length=1)
-      super :char, 8, nil, count, length, "\x0"
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 8, :sign => nil, :count => count, :length => length, :default_value => "\x0"
     end
 
     #@todo: corregir lo de abajo:
@@ -232,8 +272,10 @@ module DataTypes
   end
 
   class Bool < Type
-    def initialize(count=1, length=1)
-      super :bool, 1, :unsigned, count
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 1, :sign => :unsigned, :count => count
     end
 
     def dump(value=nil)
@@ -248,8 +290,10 @@ module DataTypes
   end
 
   class Float32 < Type
-    def initialize(count=1, length=1)
-      super :float32, 32, nil, count, length, 0.0
+    def initialize(options = {})
+      count = options[:count] || 1
+      length = options[:length] || 1
+      super :bit_length => 32, :sign => nil, :count => count, :length => length, :default_value => 0.0
     end
 
     def dump(value=nil)
