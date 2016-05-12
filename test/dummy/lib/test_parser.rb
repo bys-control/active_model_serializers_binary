@@ -24,16 +24,15 @@ class Producto
 	# 	self.instance_variable_set("@variable", value)
 	# end
 
-	# Formato atributo, Coder, Count, Length
-	serialize_options :id, Int16
-	serialize_options :silo, Int16
-	serialize_options :nombre, Char,1, 20
-	serialize_options :total_acumulado, Int32
-	serialize_options :bits1, Bool, 1
-	serialize_options :bits2, Bool, 1
-	serialize_options :total_acumulado_1, Int32
-	serialize_options :float, Float32
-	serialize_options :variable, Char, 1, 20
+	int16 :id
+	int16 :silo
+	char :nombre, 1, 20
+	int32 :total_acumulado
+	bool :bits1, 1
+	bool :bits2, 1
+	int32 :total_acumulado_1
+	float32 :float
+	char :variable, 1, 20
 end
 
 
