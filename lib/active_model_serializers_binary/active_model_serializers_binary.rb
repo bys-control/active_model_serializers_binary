@@ -21,6 +21,46 @@ module ActiveModel
         def serialize_options(attr_name, coder, count=1, length=1)
           self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length})
         end
+
+        def int8( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::Int8, count, length
+        end
+
+        def int16( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::Int16, count, length
+        end
+
+        def int32( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::Int32, count, length
+        end
+
+        def uint8( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::UInt8, count, length
+        end
+
+        def uint16( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::UInt16, count, length
+        end
+
+        def uint32( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::UInt32, count, length
+        end
+
+        def bitfield( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::BitField, count, length
+        end
+
+        def float32( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::Float32, count, length
+        end
+
+        def char( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::Char, count, length
+        end
+
+        def bool( attr_name, count=1, length=1 )
+          serialize_options attr_name, DataTypes::Bool, count, length
+        end
       end
 
       class Serializer #:nodoc:
