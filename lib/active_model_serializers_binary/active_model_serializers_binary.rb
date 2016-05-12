@@ -32,7 +32,6 @@ module ActiveModel
         end
 
         def dump
-          binding.pry
           serializable_values = @serializable.serializable_hash(options)
           start_address = @options[:start_address] || 0
 
