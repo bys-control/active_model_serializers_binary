@@ -16,6 +16,12 @@ class Producto
     	instance_values
     end
 
+	def attributes=(hash)
+		hash.each do |key, value|
+			instance_variable_set("@#{key}", value)
+		end
+	end
+
 	# def metodo
 	# 	self.instance_variable_get("@variable")
 	# end
@@ -57,5 +63,8 @@ serial = orig.to_bytes
 puts serial.inspect.yellow
 
 puts 'deserializando...'
-deser = Producto.new.from_bytes serial
+deser = Producto.new.from_bytes serial do |b|
+	b.inspect
+	binding.pry
+end
 puts deser.inspect.green

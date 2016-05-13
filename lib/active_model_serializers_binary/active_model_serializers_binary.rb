@@ -194,39 +194,21 @@ module ActiveModel
 
       end #close class serializer
 
-      # Returns XML representing the model. Configuration can be
+      # Returns a binary array representing the model. Configuration can be
       # passed through +options+.
       #
-      # Without any +options+, the returned XML string will include all the
-      # model's attributes.
+      #   person = Person.find(1)
+      #   person.to_bytes
       #
-      #   user = User.find(1)
-      #   user.to_xml
+      #   => [98, 111, 98, 0, 0, 0, 0, 0, 0, 0, 22, 0, 1]
       #
-      #   <?xml version="1.0" encoding="UTF-8"?>
-      #   <user>
-      #     <id type="integer">1</id>
-      #     <name>David</name>
-      #     <age type="integer">16</age>
-      #     <created-at type="dateTime">2011-01-30T22:29:23Z</created-at>
-      #   </user>
-      #
-      # The <tt>:only</tt> and <tt>:except</tt> options can be used to limit the
-      # attributes included, and work similar to the +attributes+ method.
-      #
-      # To include the result of some method calls on the model use <tt>:methods</tt>.
-      #
-      # To include associations use <tt>:include</tt>.
-      #
-      # For further documentation, see <tt>ActiveRecord::Serialization#to_xml</tt>
       def to_bytes(options = {}, &block)
         default_options = {
             :align => true,
-            :block => block
         }
         options = default_options.deep_merge(options)
-        if !options[:block].blank?
-            instance_exec(self, &options[:block])
+        if block_given?
+            yield self
         end
         Serializer.new(self, options).dump
       end
@@ -248,17 +230,17 @@ module ActiveModel
       #       instance_values
       #     end
       #
-      #     char :name, count: 1, lenght: 10
+      #     char :name, count: 1, length: 10
       #     int16 :age
       #     bool :awesome
       #   end
       #
       #   bytes = [98, 111, 98, 0, 0, 0, 0, 0, 0, 0, 22, 0, 1]
       #   person = Person.new
-      #   person.from_bytes(bytes) # => #<Person:0x007fec5e3b3c40 @age=22, @awesome=true, @name="bob">
-      #   person.name          # => "bob"
-      #   person.age           # => 22
-      #   person.awesome       # => true
+      #   person.from_bytes(bytes) do |p|
+      #     p.name.upcase!
+      #   end
+      #   => #<Person:0x007fec5e3b3c40 @age=22, @awesome=true, @name="bob">
       #
       # @param [Array] buffer byte array with model data to deserialize
       # @param [Hash] options deserealization options
@@ -268,17 +250,14 @@ module ActiveModel
       # @yield code block to execute after deserialization
       #
       def from_bytes(buffer, options = {}, &block)
-
-        binding.pry
         default_options = {
-            :align => true,
-            :block => block
+            :align => true
         }
         options = default_options.deep_merge(options)
         retVal = Serializer.new(self, options).load buffer
         
-        if !options[:block].blank?
-            instance_exec(self, &options[:block])
+        if block_given?
+          yield self
         end
         retVal
       end
