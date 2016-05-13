@@ -39,7 +39,6 @@ class Producto
 	int32 :total_acumulado_1
 	float32 :float
 	char :variable, count: 1, length: 20 do |field, mode|
-		binding.pry
 		puts (mode.to_s + ': variable block').blue
 	end
 end
