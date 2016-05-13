@@ -8,13 +8,13 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value
     end
 
-    def load(value)
-      self.value = check_raw_value(value)
-      @raw_value = @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value)
+      after_load
     end
   end
 
@@ -24,13 +24,13 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value.pack('v*').unpack('C*')
     end
 
-    def load(value)
-      self.value = check_raw_value(value).pack('C*').unpack('v*')
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack('v*')
+      after_load
     end
   end
 
@@ -40,13 +40,13 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value.pack('V*').unpack('C*')
     end
 
-    def load(value)
-      self.value = check_raw_value(value).pack('C*').unpack('V*') if !value.nil?
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack('V*') if !value.nil?
+      after_load
     end
   end
 
@@ -56,14 +56,14 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value.pack('v*').unpack('C*')
     end
 
-    def load(value)
-      @raw_value = check_raw_value(value)
+    def load(raw_value)
+      @raw_value = check_raw_value(raw_value)
       self.value = @raw_value.pack('C*').unpack('v*')
-      @value1 
+      after_load
     end
   end
 
@@ -73,13 +73,13 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value.pack('l*').unpack('C*')
     end
 
-    def load(value)
-      self.value = check_raw_value(value).pack('C*').unpack('l*') if !value.nil?
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack('l*') if !value.nil?
+      after_load
     end
   end
 
@@ -89,13 +89,13 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value
     end
 
-    def load(value)
-      self.value = check_raw_value(value)
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value)
+      after_load
     end
   end
 
@@ -126,37 +126,30 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       data = @value.pack(format).unpack('b*').first.chars.each_slice(word_length).map(&:join).map{|n| n.slice(0,bit_length)}
       @raw_value = [data.join].pack('b*').unpack('C*')
     end
 
-    def load(value)
-      self.value = check_raw_value(value).pack('C*').unpack('b*').first.chars.slice(0,@bit_length*@count).each_slice(bit_length).map(&:join).map{|n| [n].pack('b*').unpack('C*').first}
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack('b*').first.chars.slice(0,@bit_length*@count).each_slice(bit_length).map(&:join).map{|n| [n].pack('b*').unpack('C*').first}
+      after_load
     end
   end
 
   class Char < Type
     def initialize(options = {})
-      super :bit_length => 8, :sign => nil, :count => options[:count], :length => options[:length], :default_value => "\x0"
-    end
-
-    #@todo: corregir lo de abajo:
-    def self.serialize(value)
-      var = Char.new
-      var.value = value
-      var.serialize
+      super :bit_length => 8, :sign => nil, :count => options[:count], :length => options[:length], :default_value => "\x0", :block => options[:block]
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value.map{|v| v.ljust(@length, @default_value).slice(0,@length).unpack('C*')}
     end
 
-    def load(value)
-      self.value = check_raw_value(value).pack('C*').unpack("Z#{@length}") if !value.nil?
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack("Z#{@length}") if !value.nil?
+      after_load
     end
   end
 
@@ -166,13 +159,13 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = Array(@value.map{|v| v ? 1 : 0}.join).pack('b*').unpack('C*')
     end
 
-    def load(value)
-      self.value = check_raw_value(value).pack('C*').unpack('b*').first.slice(0,size*8).split('').map(&:to_i) if !value.nil?
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack('b*').first.slice(0,size*8).split('').map(&:to_i) if !value.nil?
+      after_load
     end
   end
 
@@ -182,13 +175,13 @@ module DataTypes
     end
 
     def dump(value=nil)
-      self.value = value if !value.nil?
+      before_dump( value )
       @raw_value = @value.pack('e*').unpack('C*')
     end
 
-    def load(value)
-      self.value = check_raw_value(value).pack('C*').unpack('e*') if !value.nil?
-      @value
+    def load(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack('e*') if !value.nil?
+      after_load
     end
   end
 end

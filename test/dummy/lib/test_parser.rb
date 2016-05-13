@@ -38,7 +38,10 @@ class Producto
 	bool :bits2
 	int32 :total_acumulado_1
 	float32 :float
-	char :variable, count: 1, length: 20
+	char :variable, count: 1, length: 20 do |field, mode|
+		binding.pry
+		puts (mode.to_s + ': variable block').blue
+	end
 end
 
 
@@ -58,13 +61,14 @@ puts 'Datos originales...'
 puts orig.inspect.green
 
 puts 'serializando...'
-serial = orig.to_bytes
+serial = orig.to_bytes do |b|
+	puts 'to_bytes block'.blue
+end
 
 puts serial.inspect.yellow
 
 puts 'deserializando...'
 deser = Producto.new.from_bytes serial do |b|
-	b.inspect
-	binding.pry
+	puts 'from_bytes block'.blue
 end
 puts deser.inspect.green

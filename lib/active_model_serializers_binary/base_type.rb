@@ -13,6 +13,9 @@ module DataTypes
       @count = options[:count] || 1             # Cantidad de elementos del array
       @length = options[:length]  || 1          # En char y bitfield especifica la longitud del campo. Ignorado para el resto de los tipos
       @value = check_value( @default_value )
+      @block = options[:block]
+      @name = options[:name]
+      @parent = options[:parent]
     end
 
     def to_s
@@ -98,6 +101,36 @@ module DataTypes
 
     def value=(value)
       @value = check_value(value)
+    end
+
+
+    #
+    # Se ejecuta antes de serializar los datos
+    #
+    # @param [Object] value valor del objeto a serializar original
+    #
+    # @return [Array] nuevo valor del objeto a serializar
+    # 
+    def before_dump(value)
+      self.value = value if !value.nil?
+      if !@block.nil?
+        value = @parent.instance_exec( self, :dump, &@block )
+        self.value = value if !value.nil?
+      end
+    end
+
+    #
+    # Se ejecuta después de deserializar los datos. @value contiene los datos deserializados
+    #
+    #
+    # @return [Array] Array con los datos deserializados
+    # 
+    def after_load
+      if !@block.nil?
+        value = @parent.instance_exec( self, :load, &@block )
+        self.value = value if !value.nil?
+      end
+      @value
     end
   end
 end

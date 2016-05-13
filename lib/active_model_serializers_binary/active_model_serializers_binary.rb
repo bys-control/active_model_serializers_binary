@@ -18,48 +18,49 @@ module ActiveModel
       end
 
       module ClassMethods
-        def serialize_options(attr_name, coder, count=1, length=1)
-          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length})
+        # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
+        def serialize_options(attr_name, coder, count=1, length=1, &block )
+          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name, :parent => self})
         end
 
-        def int8( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::Int8, options[:count], options[:length]
+        def int8( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::Int8, options[:count], options[:length], &block
         end
 
-        def int16( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::Int16, options[:count], options[:length]
+        def int16( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::Int16, options[:count], options[:length], &block
         end
 
-        def int32( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::Int32, options[:count], options[:length]
+        def int32( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::Int32, options[:count], options[:length], &block
         end
 
-        def uint8( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::UInt8, options[:count], options[:length]
+        def uint8( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::UInt8, options[:count], options[:length], &block
         end
 
-        def uint16( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::UInt16, options[:count], options[:length]
+        def uint16( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::UInt16, options[:count], options[:length], &block
         end
 
-        def uint32( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::UInt32, options[:count], options[:length]
+        def uint32( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::UInt32, options[:count], options[:length], &block
         end
 
-        def bitfield( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::BitField, options[:count], options[:length]
+        def bitfield( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::BitField, options[:count], options[:length], &block
         end
 
-        def float32( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::Float32, options[:count], options[:length]
+        def float32( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::Float32, options[:count], options[:length], &block
         end
 
-        def char( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::Char, options[:count], options[:length]
+        def char( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::Char, options[:count], options[:length], &block
         end
 
-        def bool( attr_name, options = {} )
-          serialize_options attr_name, DataTypes::Bool, options[:count], options[:length]
+        def bool( attr_name, options = {}, &block )
+          serialize_options attr_name, DataTypes::Bool, options[:count], options[:length], &block
         end
       end
 
@@ -79,8 +80,8 @@ module ActiveModel
           tmp_buffer = [] # Buffer temporal en bytes
           current_address = start_address*2 + 0.0 # Dirección en bytes
 
-          @serializable.attr_config.each do |key, value|
-            var = value[:coder].new(:count => value[:count], :length => value[:length])
+          @serializable.attr_config.each do |key, options|
+            var = options[:coder].new(options)
             # Busca el valor del atributo y si no existe devuelve nil
             var.value = serializable_values[key] rescue nil
 
@@ -138,12 +139,12 @@ module ActiveModel
 
           current_address = start_address*2 + 0.0 # Dirección en bytes
 
-          @serializable.attr_config.each do |key, value|
-            #puts "#{key} - #{value}"
+          @serializable.attr_config.each do |key, options|
+            #puts "#{key} - #{options}"
             byte = current_address.floor
             bit = (current_address.modulo(1)*8).round
 
-            var = value[:coder].new(:count => value[:count], :length => value[:length]) #creo objeto del tipo de dato pasado
+            var = options[:coder].new(options) #creo objeto del tipo de dato pasado
 
             if @options[:align]
               if !var.type.in? [:bitfield, :bool]
