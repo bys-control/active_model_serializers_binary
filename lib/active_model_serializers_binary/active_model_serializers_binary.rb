@@ -231,10 +231,10 @@ module ActiveModel
         Serializer.new(self, options).dump
       end
 
-      # Sets the model +attributes+ from an XML string. Returns +self+.
+      # Sets the model +attributes+ from an Binary string. Returns +self+.
       #
       #   class Person
-      #     include ActiveModel::Serializers::Xml
+      #     include ActiveModel::Serializers::Binary
       #
       #     attr_accessor :name, :age, :awesome
       #
@@ -247,15 +247,29 @@ module ActiveModel
       #     def attributes
       #       instance_values
       #     end
+      #
+      #     char :name, count: 1, lenght: 10
+      #     int16 :age
+      #     bool :awesome
       #   end
       #
-      #   xml = { name: 'bob', age: 22, awesome:true }.to_xml
+      #   bytes = [98, 111, 98, 0, 0, 0, 0, 0, 0, 0, 22, 0, 1]
       #   person = Person.new
-      #   person.from_xml(xml) # => #<Person:0x007fec5e3b3c40 @age=22, @awesome=true, @name="bob">
+      #   person.from_bytes(bytes) # => #<Person:0x007fec5e3b3c40 @age=22, @awesome=true, @name="bob">
       #   person.name          # => "bob"
       #   person.age           # => 22
       #   person.awesome       # => true
+      #
+      # @param [Array] buffer byte array with model data to deserialize
+      # @param [Hash] options deserealization options
+      #
+      # @return [Object] Deserialized object
+      # 
+      # @yield code block to execute after deserialization
+      #
       def from_bytes(buffer, options = {}, &block)
+
+        binding.pry
         default_options = {
             :align => true,
             :block => block
