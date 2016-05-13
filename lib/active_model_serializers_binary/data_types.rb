@@ -4,7 +4,7 @@ module DataTypes
 
   class Int8 < Type
     def initialize(options = {})
-      super :bit_length => 8, :sign => :signed, :count => options[:count]
+      super options.merge :bit_length => 8, :sign => :signed
     end
 
     def dump(value=nil)
@@ -20,7 +20,7 @@ module DataTypes
 
   class Int16 < Type
     def initialize(options = {})
-      super :bit_length => 16, :sign => :signed, :count => options[:count]
+      super options.merge :bit_length => 16, :sign => :signed
     end
 
     def dump(value=nil)
@@ -36,7 +36,7 @@ module DataTypes
 
   class Int32 < Type
     def initialize(options = {})
-      super :bit_length => 32, :sign => :signed, :count => options[:count]
+      super options.merge :bit_length => 32, :sign => :signed
     end
 
     def dump(value=nil)
@@ -52,7 +52,7 @@ module DataTypes
 
   class UInt16 < Type
     def initialize(options = {})
-      super :bit_length => 16, :sign => :unsigned, :count => options[:count]
+      super options.merge :bit_length => 16, :sign => :unsigned
     end
 
     def dump(value=nil)
@@ -69,7 +69,7 @@ module DataTypes
 
   class UInt32 < Type
     def initialize(options = {})
-      super :bit_length => 32, :sign => :unsigned, :count => options[:count]
+      super options.merge :bit_length => 32, :sign => :unsigned
     end
 
     def dump(value=nil)
@@ -85,7 +85,7 @@ module DataTypes
 
   class UInt8 < Type
     def initialize(options = {})
-      super :bit_length => 8, :sign => :unsigned, :count => options[:count]
+      super options.merge :bit_length => 8, :sign => :unsigned
     end
 
     def dump(value=nil)
@@ -102,7 +102,7 @@ module DataTypes
   class BitField < Type
     def initialize(options = {})
       length = 32 if length > 32
-      super :bit_length => length, :sign => :unsigned, :count => options[:count]
+      super options.merge :bit_length => length, :sign => :unsigned
     end
 
     def format
@@ -139,7 +139,7 @@ module DataTypes
 
   class Char < Type
     def initialize(options = {})
-      super :bit_length => 8, :sign => nil, :count => options[:count], :length => options[:length], :default_value => "\x0", :block => options[:block]
+      super options.merge :bit_length => 8, :sign => nil, :default_value => "\x0"
     end
 
     def dump(value=nil)
@@ -155,7 +155,7 @@ module DataTypes
 
   class Bool < Type
     def initialize(options = {})
-      super :bit_length => 1, :count => options[:count], :default_value => false
+      super options.merge :bit_length => 1, :default_value => false
     end
 
     def dump(value=nil)
@@ -171,7 +171,7 @@ module DataTypes
 
   class Float32 < Type
     def initialize(options = {})
-      super :bit_length => 32, :sign => nil, :count => options[:count], :default_value => 0.0
+      super options.merge :bit_length => 32, :sign => nil, :default_value => 0.0
     end
 
     def dump(value=nil)

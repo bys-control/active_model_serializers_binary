@@ -15,12 +15,19 @@ module ActiveModel
 
         class_attribute :attr_config
         self.attr_config = {}
+
+        def initialize
+          super
+          self.attr_config.each do |key, options|
+            options[:parent] = self
+          end
+        end
       end
 
       module ClassMethods
         # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
         def serialize_options(attr_name, coder, count=1, length=1, &block )
-          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name, :parent => self})
+          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name})
         end
 
         def int8( attr_name, options = {}, &block )
