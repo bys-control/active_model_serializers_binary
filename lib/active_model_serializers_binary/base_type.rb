@@ -48,6 +48,8 @@ module DataTypes
               v.to_f
             when :char
               v.to_s[0...length]
+            when :bool
+              (v.in? [0, false]) ? false : true
             else
               v.to_i
           end

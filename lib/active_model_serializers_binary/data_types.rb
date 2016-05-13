@@ -162,12 +162,12 @@ module DataTypes
 
   class Bool < Type
     def initialize(options = {})
-      super :bit_length => 1, :sign => :unsigned, :count => options[:count]
+      super :bit_length => 1, :count => options[:count], :default_value => false
     end
 
     def dump(value=nil)
       self.value = value if !value.nil?
-      @raw_value = [@value.join].pack('b*').unpack('C*')
+      @raw_value = Array(@value.map{|v| v ? 1 : 0}.join).pack('b*').unpack('C*')
     end
 
     def load(value)
