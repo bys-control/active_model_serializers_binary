@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.email       = ["info@bys-control.com.ar"]
   s.homepage    = "https://github.com/bys-control/active_model_serializers_binary"
   s.summary     = "Serialize models to/from binary format for raw data exchange"
-  s.description = "Binary serializer for Ruby Active Model"
+  s.description = "active_model_serializers_binary is a declarative way to serialize/deserialize ActiveModel classes for raw data exchange.
   s.license     = "MIT"
 
   s.files = `git ls-files -z`.split("\x0")
