@@ -16,7 +16,7 @@ module ActiveModel
         class_attribute :attr_config
         self.attr_config = {}
 
-        def initialize
+        def initialize(*)
           super
           self.attr_config.each do |key, options|
             options[:parent] = self
