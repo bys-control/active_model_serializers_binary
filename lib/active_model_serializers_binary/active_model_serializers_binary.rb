@@ -15,13 +15,6 @@ module ActiveModel
 
         class_attribute :attr_config
         self.attr_config = {}
-
-        def initialize(*args)
-          super
-          self.attr_config.each do |key, options|
-            options[:parent] = self
-          end
-        end
       end
 
       module ClassMethods
@@ -88,7 +81,7 @@ module ActiveModel
           current_address = start_address*2 + 0.0 # Dirección en bytes
 
           @serializable.attr_config.each do |key, options|
-            var = options[:coder].new(options)
+            var = options[:coder].new(options.merge(parent: @serializable))
             # Busca el valor del atributo y si no existe devuelve nil
             var.value = serializable_values[key] rescue nil
 
@@ -147,11 +140,10 @@ module ActiveModel
           current_address = start_address*2 + 0.0 # Dirección en bytes
 
           @serializable.attr_config.each do |key, options|
-            #puts "#{key} - #{options}"
             byte = current_address.floor
             bit = (current_address.modulo(1)*8).round
 
-            var = options[:coder].new(options) #creo objeto del tipo de dato pasado
+            var = options[:coder].new(options.merge(parent: @serializable)) #creo objeto del tipo de dato pasado
 
             if @options[:align]
               if !var.type.in? [:bitfield, :bool]
