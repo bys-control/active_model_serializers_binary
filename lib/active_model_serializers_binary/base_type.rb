@@ -115,8 +115,8 @@ module DataTypes
       self.value = value if !value.nil?
       if !@block.nil?
         value = @parent.instance_exec( self, :dump, &@block )
-        self.value = value if !value.nil?
       end
+      self.value = value if !value.nil?
     end
 
     #
@@ -127,8 +127,7 @@ module DataTypes
     # 
     def after_load
       if !@block.nil?
-        value = @parent.instance_exec( self, :load, &@block )
-        self.value = value if !value.nil?
+        @parent.instance_exec( self, :load, &@block )
       end
       @value
     end

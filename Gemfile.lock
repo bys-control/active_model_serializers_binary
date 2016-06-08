@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    active_model_serializers_binary (0.0.15)
+    active_model_serializers_binary (0.0.17)
       activemodel (~> 4.1)
 
 GEM

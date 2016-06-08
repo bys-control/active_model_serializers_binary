@@ -173,22 +173,18 @@ module ActiveModel
               tmp_buffer = buffer.slice(byte, (var.size+bit/8.0).ceil)
               result_deserialized=var.load([tmp_buffer.pack('C*').unpack('b*').first.slice(bit,var.size*8)].pack('b*').unpack('C*'))
             end
-            # puts result_deserialized.inspect
             serialized_values["#{key}"] = result_deserialized.count>1 ? result_deserialized : result_deserialized.first
             current_address = (byte+bit/8.0)+var.size
           end
 
-          # if !@serializable.instance_variable_get(:@attributes).nil?
-          #   @serializable.instance_variable_get(:@attributes).merge!(serialized_values) rescue nil
-          # else
-            serialized_values.each do |k,v|
-              if @serializable.respond_to? "#{k}="
-                @serializable.send("#{k}=", v)
-              else
-                @serializable.instance_variable_set("@#{k}".to_sym, v)
-              end
+          # Asigno los datos leidos
+          serialized_values.each do |k,v|
+            if @serializable.respond_to? "#{k}="
+              @serializable.send("#{k}=", v)
+            else
+              @serializable.instance_variable_set("@#{k}".to_sym, v)
             end
-          #end
+          end
           @serializable
         end
 
