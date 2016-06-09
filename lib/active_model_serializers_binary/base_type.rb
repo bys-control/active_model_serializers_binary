@@ -28,7 +28,7 @@ module DataTypes
 
     # Return size of object in bytes
     def size
-      ((@bit_length*@length*@count)/8.0).ceil
+      (@bit_length*@length*@count)/8.0
     end
 
     def check( value, options = {} )

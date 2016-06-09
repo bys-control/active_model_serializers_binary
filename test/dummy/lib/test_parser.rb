@@ -13,10 +13,24 @@ orig.silo = 0
 orig.nombre = "MAIZ"
 orig.total_acumulado = 50
 orig.bits1 = 1
-orig.bits2 = 1
+orig.bits2 = 0
+orig.bits3 = 1
+orig.bits4 = 0
+orig.bits5 = 1
+orig.bits6 = 0
+orig.bits7 = 1
+orig.bits8 = 0
+orig.bits9 = 1
+orig.bits10 = 0
+orig.bits11 = 1
+orig.bits12 = 0
+orig.bits13 = 1
+orig.bits14 = 0
+orig.bits15 = 1
+orig.bits16 = 0
 orig.ffloat= 1.2345678
 orig.variable = '012345678901234567890123456789'
-orig.test = 1
+orig.test = (1..10).to_a
 
 puts 'Datos originales...'
 puts orig.inspect.green
