@@ -16,6 +16,7 @@ orig.bits1 = 1
 orig.bits2 = 1
 orig.ffloat= 1.2345678
 orig.variable = '012345678901234567890123456789'
+orig.test = 1
 
 puts 'Datos originales...'
 puts orig.inspect.green

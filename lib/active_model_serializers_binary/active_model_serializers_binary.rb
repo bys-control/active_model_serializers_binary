@@ -15,12 +15,23 @@ module ActiveModel
 
         class_attribute :attr_config
         self.attr_config = {}
+
+        def attributes
+          keys = self.attr_config.select{|k, v| v[:accessor]==true}.keys
+          values = keys.map{ |var| self.instance_variable_get("@#{var}") }
+          super.merge(Hash[keys.zip values])
+        end
       end
 
       module ClassMethods
         # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
         def serialize_options(attr_name, coder, count=1, length=1, &block )
-          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name})
+          accessor = false
+          if not self.attribute_names.include?( attr_name.to_s )
+            attr_accessor(attr_name)
+            accessor = true
+          end
+          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name, :accessor => accessor})
         end
 
         def int8( attr_name, options = {}, &block )

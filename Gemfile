@@ -21,4 +21,5 @@ group :development do
 
   #debuggers
   gem 'pry-byebug'
+  gem 'annotate'
 end
