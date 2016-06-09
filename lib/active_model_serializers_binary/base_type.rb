@@ -52,7 +52,7 @@ module DataTypes
             when :char
               v.to_s[0...length]
             when :bool
-              (v.in? [0, false]) ? false : true
+              (v.in? [1, true]) ? true : false
             else
               v.to_i
           end
