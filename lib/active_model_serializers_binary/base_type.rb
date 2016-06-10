@@ -5,7 +5,7 @@ module DataTypes
     attr_accessor :raw_value, :bit_length, :type, :sign, :count, :length, :value, :name, :parent
 
     def initialize(options = {})
-      @default_value = options[:default_value] || 0
+      @default_value = options[:default_value].nil? ? 0 : options[:default_value]
       @raw_value = nil
       @bit_length = options[:bit_length]        # Cantidad de bits del tipo de dato
       @type = type
