@@ -28,6 +28,12 @@ module ActiveModel
         def serialize_options(attr_name, coder, count=1, length=1, &block )
           accessor = false
           if not self.attribute_names.include?( attr_name.to_s )
+            #Here's the getter
+            #self.class_eval("def #{attr_name};@#{attr_name};end")
+            
+            #Here's the setter
+            #self.class_eval("def #{attr_name}=(val);@#{attr_name}=val;end") 
+
             attr_accessor(attr_name)
             accessor = true
           end
@@ -100,7 +106,6 @@ module ActiveModel
             bit = (current_address.modulo(1)*8).round
 
             tmp_buffer = var.dump
-
             if @options[:align]
               if !var.type.in? [:bitfield, :bool]
                 # Se posiciona al principio de un byte
@@ -220,6 +225,12 @@ module ActiveModel
         Serializer.new(self, options).dump
       end
 
+      def to_words(options = {}, &block)
+        data = to_bytes(options, &block)
+        byte_count = (data.count/2.0).ceil*2
+        data.fill(0, data.count...byte_count).pack('C*').unpack('v*')
+      end
+
       # Sets the model +attributes+ from an Binary string. Returns +self+.
       #
       #   class Person
@@ -268,6 +279,12 @@ module ActiveModel
         end
         retVal
       end
+
+      def from_words(buffer, options = {}, &block)
+        data = buffer.pack('v*').unpack('C*')
+        from_bytes(data, options, &block)
+      end
+
     end
   end
 end
