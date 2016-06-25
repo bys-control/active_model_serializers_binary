@@ -24,23 +24,23 @@ class Producto < ActiveRecord::Base
 	int32 :total_acumulado
 	bool :bits1
 	bool :bits2
-	bool :bits3
-	bool :bits4
-	bool :bits5
-	bool :bits6
-	bool :bits7
-	bool :bits8
-	bool :bits9
-	bool :bits10
-	bool :bits11
-	bool :bits12
-	bool :bits13
-	bool :bits14
-	bool :bits15
-	bool :bits16
+	bool :bits3, virtual: true
+	bool :bits4, virtual: true
+	bool :bits5, virtual: true
+	bool :bits6, virtual: true
+	bool :bits7, virtual: true
+	bool :bits8, virtual: true
+	bool :bits9, virtual: true
+	bool :bits10, virtual: true
+	bool :bits11, virtual: true
+	bool :bits12, virtual: true
+	bool :bits13, virtual: true
+	bool :bits14, virtual: true
+	bool :bits15, virtual: true
+	bool :bits16, virtual: true
 	float32 :ffloat
 	char :variable, count: 1, length: 20 do |field, mode|
 		puts (mode.to_s + ': variable block').blue
 	end
-	int32 :test, count: 10 # No existe en la DB
+	int32 :test, count: 10, virtual: true # No existe en la DB
 end

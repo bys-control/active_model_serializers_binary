@@ -17,7 +17,7 @@ module ActiveModel
         self.attr_config = {}
 
         def attributes
-          keys = self.attr_config.select{|k, v| v[:accessor]==true}.keys
+          keys = self.attr_config.select{|k, v| v[:virtual]==true}.keys
           values = keys.map{ |var| self.instance_variable_get("@#{var}") }
           super.merge(Hash[keys.zip values])
         end
@@ -25,49 +25,49 @@ module ActiveModel
 
       module ClassMethods
         # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
-        def serialize_options(attr_name, coder, count=1, length=1, accessor=false, &block )
-          attr_accessor(attr_name) if accessor
-          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name, :accessor => accessor})
+        def serialize_options(attr_name, coder, count=1, length=1, virtual=false, &block )
+          attr_accessor(attr_name) if virtual
+          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name, :virtual => virtual})
         end
 
         def int8( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::Int8, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::Int8, options[:count], options[:length], options[:virtual], &block
         end
 
         def int16( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::Int16, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::Int16, options[:count], options[:length], options[:virtual], &block
         end
 
         def int32( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::Int32, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::Int32, options[:count], options[:length], options[:virtual], &block
         end
 
         def uint8( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::UInt8, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::UInt8, options[:count], options[:length], options[:virtual], &block
         end
 
         def uint16( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::UInt16, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::UInt16, options[:count], options[:length], options[:virtual], &block
         end
 
         def uint32( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::UInt32, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::UInt32, options[:count], options[:length], options[:virtual], &block
         end
 
         def bitfield( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::BitField, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::BitField, options[:count], options[:length], options[:virtual], &block
         end
 
         def float32( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::Float32, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::Float32, options[:count], options[:length], options[:virtual], &block
         end
 
         def char( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::Char, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::Char, options[:count], options[:length], options[:virtual], &block
         end
 
         def bool( attr_name, options = {}, &block )
-          serialize_options attr_name, DataTypes::Bool, options[:count], options[:length], options[:accessor], &block
+          serialize_options attr_name, DataTypes::Bool, options[:count], options[:length], options[:virtual], &block
         end
       end
 
