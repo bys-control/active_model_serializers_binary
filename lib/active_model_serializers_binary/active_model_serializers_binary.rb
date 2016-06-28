@@ -270,7 +270,7 @@ module ActiveModel
         retVal
       end
 
-      def from_words(buffer, options = {}, &block)
+      def from_words(buffer = [], options = {}, &block)
         data = buffer.pack('v*').unpack('C*')
         from_bytes(data, options, &block)
       end
