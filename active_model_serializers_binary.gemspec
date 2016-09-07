@@ -21,19 +21,19 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "bundler", "~> 1.6"
   s.add_development_dependency "rake", "~> 10.3"
-  s.add_development_dependency "sqlite3", "~> 1.3"
-  s.add_development_dependency "rails", "~> 4.1"
+  s.add_development_dependency "sqlite3"
+  s.add_development_dependency "rails", "~> 5.0"
 
-  s.add_development_dependency 'devise', '~> 3.2'
-  s.add_development_dependency 'jquery-ui-rails', '~> 4.2'
-  s.add_development_dependency 'sass-rails', '~> 4.0'
-  s.add_development_dependency 'uglifier', '~> 1.3'
-  s.add_development_dependency 'coffee-rails', '~> 4.0'
-  s.add_development_dependency 'turbolinks', "~> 2.2"
-  s.add_development_dependency 'jbuilder', '~> 1.2'
-  s.add_development_dependency 'jquery-validation-rails', '~> 1.12'
-  s.add_development_dependency 'therubyracer', '~> 0.12'
+  #s.add_development_dependency 'devise', '~> 3.2'
+  #s.add_development_dependency 'jquery-ui-rails', '~> 4.2'
+  #s.add_development_dependency 'sass-rails', '~> 4.0'
+  #s.add_development_dependency 'uglifier', '~> 1.3'
+  #s.add_development_dependency 'coffee-rails', '~> 4.0'
+  #s.add_development_dependency 'turbolinks', "~> 2.2"
+  #s.add_development_dependency 'jbuilder', '~> 1.2'
+  #s.add_development_dependency 'jquery-validation-rails', '~> 1.12'
+  #s.add_development_dependency 'therubyracer', '~> 0.12'
   s.add_development_dependency "colorize", '~> 0.7'
 
-  s.add_dependency "activemodel", "~> 4.1"
+  s.add_dependency "activemodel", "~> 5.0"
 end
