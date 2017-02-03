@@ -2,7 +2,7 @@ require_relative 'base_type.rb'
 
 module DataTypes
 
-  class Int8 < Type
+  class Int8 < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 8, :sign => :signed
     end
@@ -18,7 +18,7 @@ module DataTypes
     end
   end
 
-  class Int16 < Type
+  class Int16 < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 16, :sign => :signed
     end
@@ -34,7 +34,7 @@ module DataTypes
     end
   end
 
-  class Int32 < Type
+  class Int32 < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 32, :sign => :signed
     end
@@ -50,7 +50,7 @@ module DataTypes
     end
   end
 
-  class UInt16 < Type
+  class UInt16 < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 16, :sign => :unsigned
     end
@@ -67,7 +67,7 @@ module DataTypes
     end
   end
 
-  class UInt32 < Type
+  class UInt32 < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 32, :sign => :unsigned
     end
@@ -83,7 +83,7 @@ module DataTypes
     end
   end
 
-  class UInt8 < Type
+  class UInt8 < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 8, :sign => :unsigned
     end
@@ -99,7 +99,7 @@ module DataTypes
     end
   end
 
-  class BitField < Type
+  class BitField < BaseType
     def initialize(options = {})
       length = 32 if length > 32
       super options.merge :bit_length => length, :sign => :unsigned
@@ -137,7 +137,7 @@ module DataTypes
     end
   end
 
-  class Char < Type
+  class Char < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 8, :sign => nil, :default_value => "\x0"
     end
@@ -153,7 +153,7 @@ module DataTypes
     end
   end
 
-  class Bool < Type
+  class Bool < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 1, :default_value => false
     end
@@ -169,7 +169,7 @@ module DataTypes
     end
   end
 
-  class Float32 < Type
+  class Float32 < BaseType
     def initialize(options = {})
       super options.merge :bit_length => 32, :sign => nil, :default_value => 0.0
     end

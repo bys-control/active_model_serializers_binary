@@ -1,6 +1,6 @@
 module DataTypes
 
-  class Type
+  class BaseType
 
     attr_accessor :raw_value, :bit_length, :type, :sign, :count, :length, :value, :name, :parent
 
