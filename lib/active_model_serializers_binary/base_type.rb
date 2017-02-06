@@ -78,7 +78,7 @@ module DataTypes
     def check_raw_value(value)
       check(value, {
         :type => :uint8,
-        :count => size,
+        :count => (size < 1 ? 1 : size),
         :length => 1,
         :bit_length => 8,
         :sign => :unsigned,

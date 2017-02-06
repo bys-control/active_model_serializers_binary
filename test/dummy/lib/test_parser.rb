@@ -13,8 +13,8 @@ orig.silo = 0
 orig.nombre = "MAIZ"
 orig.total_acumulado = 50
 orig.bits1 = 1
-orig.bits2 = 0
-orig.bits3 = nil
+orig.bits2 = 1
+orig.bits3 = 1
 orig.bits4 = nil
 orig.bits5 = nil
 orig.bits6 = nil
@@ -47,3 +47,7 @@ deser = Producto.new.from_bytes serial do |b|
 	puts 'from_bytes block'.blue
 end
 puts deser.inspect.green
+
+must_be_equal = (serial <=> deser.to_bytes) === 0
+puts "Test OK".green if must_be_equal
+puts "Test fail".red unless must_be_equal
