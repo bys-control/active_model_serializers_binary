@@ -101,7 +101,7 @@ module DataTypes
 
   class BitField < BaseType
     def initialize(options = {})
-      length = 32 if length > 32
+      length = options[:bin_length].blank? ? 1 : (options[:bin_length] > 32 ? 32 : options[:bin_length])
       super options.merge :bit_length => length, :sign => :unsigned
     end
 
