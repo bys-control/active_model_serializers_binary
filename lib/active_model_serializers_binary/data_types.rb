@@ -8,12 +8,12 @@ module DataTypes
     end
 
     def dump(value=nil)
-      before_dump( value )
+      before_dump( value ).pack('c*').unpack('C*')
       @raw_value = @value
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value)
+      self.value = check_raw_value(raw_value).pack('C*').unpack('c*')
       after_load
     end
   end
@@ -25,11 +25,11 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('v*').unpack('C*')
+      @raw_value = @value.pack('s<*').unpack('C*')
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack('v*')
+      self.value = check_raw_value(raw_value).pack('C*').unpack('s<*')
       after_load
     end
   end
@@ -41,11 +41,11 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('V*').unpack('C*')
+      @raw_value = @value.pack('l<*').unpack('C*')
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack('V*') if !value.nil?
+      self.value = check_raw_value(raw_value).pack('C*').unpack('l<*') if !value.nil?
       after_load
     end
   end
@@ -57,12 +57,12 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('v*').unpack('C*')
+      @raw_value = @value.pack('S<*').unpack('C*')
     end
 
-    def load(raw_value)
+    def load(raw_value) 
       @raw_value = check_raw_value(raw_value)
-      self.value = @raw_value.pack('C*').unpack('v*')
+      self.value = @raw_value.pack('C*').unpack('S<*')
       after_load
     end
   end
@@ -74,11 +74,11 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('l*').unpack('C*')
+      @raw_value = @value.pack('L<*').unpack('C*')
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack('l*') if !value.nil?
+      self.value = check_raw_value(raw_value).pack('C*').unpack('L<*') if !value.nil?
       after_load
     end
   end
