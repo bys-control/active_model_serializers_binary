@@ -17,16 +17,32 @@ module ActiveModel
         self.attr_config = {}
 
         def attributes
-          keys = self.attr_config.select{|k, v| v[:virtual]==true}.keys
+          keys = self.attr_config.select do |k, v|
+            if v[:virtual]==true
+              true
+            else
+              if !self.respond_to? "#{k}"
+                v[:virtual] = true
+                self.class.add_attr_accessor(k)
+                true
+              else
+                false
+              end
+            end
+          end.keys
           values = keys.map{ |var| self.instance_variable_get("@#{var}") }
           super.merge(Hash[keys.zip values])
         end
       end
 
       module ClassMethods
+        # public interface to private class method attr_accessor
+        def add_attr_accessor( attr_name )
+          attr_accessor attr_name.to_sym
+        end
+
         # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
-        def serialize_options(attr_name, coder, count=1, length=1, virtual=false, &block )
-          attr_accessor(attr_name) if virtual
+        def serialize_options( attr_name, coder, count=1, length=1, virtual=false, &block )
           self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name, :virtual => virtual})
         end
 
@@ -194,6 +210,45 @@ module ActiveModel
           @serializable
         end
 
+        # Return size of object in bytes
+        def size
+          serializable_values = @serializable.serializable_hash(options)
+          start_address = @options[:start_address] || 0
+
+          current_address = 0.0 # Dirección en bytes
+
+          @serializable.attr_config.each do |key, options|
+            var = options[:coder].new(options.merge(parent: @serializable))
+
+            byte = current_address.floor
+            bit = (current_address.modulo(1)*8).round
+
+            if @options[:align]
+              if !var.type.in? [:bitfield, :bool]
+                # Se posiciona al principio de un byte
+                if bit != 0
+                  byte += 1
+                  bit = 0
+                  current_address = (byte+bit/8.0)
+                end
+                # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
+                if var.bit_length > 8 and current_address.modulo(2) != 0
+                  byte += 1
+                  bit = 0
+                end
+                # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
+                if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
+                  byte += 4-byte%4
+                  bit = 0
+                end
+              end
+            end
+
+            current_address = (byte+bit/8.0)+var.size
+          end
+          current_address-start_address
+        end
+
       end #close class serializer
 
       # Returns a binary array representing the model. Configuration can be
@@ -273,6 +328,14 @@ module ActiveModel
       def from_words(buffer = [], options = {}, &block)
         data = buffer.pack('v*').unpack('C*')
         from_bytes(data, options, &block)
+      end
+
+      def size(options = {})
+        default_options = {
+            :align => true
+        }
+        options = default_options.deep_merge(options)
+        Serializer.new(self, options).size
       end
 
     end
