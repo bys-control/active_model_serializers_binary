@@ -14,11 +14,15 @@ module ActiveModel
         extend ActiveModel::Naming
 
         class_attribute :attr_config
-        self.attr_config = {}
+        class_attribute :serialize_options_global
+        self.attr_config = []
+        self.serialize_options_global = {
+          align: false    # Don't align data to byte/word/dword boundary
+        }
 
         def attributes
-          keys = self.attr_config.select{ |k, v| v[:virtual]==true }.keys
-          values = keys.map{ |var| self.instance_variable_get("@#{var}") }
+          keys = self.attr_config.select{ |attr| attr[:virtual]==true }.map{ |attr| attr[:name] }
+          values = keys.map{ |attr| self.instance_variable_get("@#{attr}") }
           (super rescue {}).merge(Hash[keys.zip values])
         end
 
@@ -36,16 +40,16 @@ module ActiveModel
 
       module ClassMethods
         def add_virtual_attributes( instance )
-          self.attr_config.each{ |k, v| add_virtual_attribute(instance, k, v) }
+          self.attr_config.each{ |attr| add_virtual_attribute(instance, attr) }
         end
 
-        def add_virtual_attribute( instance, attr_name, attr_value )
-          attr_name = attr_name.to_s
-          if attr_value[:virtual] == true
+        def add_virtual_attribute( instance, attr )
+          if attr[:virtual] == true
             true
           else
+            attr_name = attr[:name].to_s
             if !instance.respond_to? attr_name
-              attr_value[:virtual] = true
+              attr[:virtual] = true
               attr_accessor attr_name
               true
             else
@@ -56,11 +60,11 @@ module ActiveModel
 
         # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
         def serialize_options( attr_name, coder, count=1, length=1, virtual=false, &block )
-          self.attr_config.merge!(attr_name.to_s => {:coder => coder, :count => count, :length => length, :block => block, :name => attr_name, :virtual => virtual})
+          self.attr_config.push({:coder => coder, :count => count, :length => length, :block => block, :name => attr_name.to_s, :virtual => virtual})
         end
 
         def serialize_attribute_options( attr_name, options, &block )
-          self.attr_config.merge!(attr_name.to_s => options.merge({ block: block }))
+          self.attr_config.push(options.merge({:name => attr_name.to_s, block: block }))
         end       
 
         def int8( attr_name, options = {}, &block )
@@ -124,12 +128,14 @@ module ActiveModel
           tmp_buffer = [] # Aux Data Buffer
           current_address = start_address*2 + 0.0 # Address in bytes
 
-          @serializable.attr_config.each do |attr_name, attr_options|
+          @serializable.attr_config.each do |attr_options|
+            attr_name = attr_options[:name]
             if attr_options[:type] != :nest
               var = attr_options[:coder].new(attr_options.merge(parent: @serializable))
               var.value = serializable_values[attr_name] rescue nil
             else
-              var = attr_options[:coder].new(serializable_values[attr_name].attributes)
+              var_value = serializable_values[attr_name].attributes rescue nil
+              var = attr_options[:coder].new(var_value)
             end
 
             byte = current_address.floor
@@ -186,7 +192,8 @@ module ActiveModel
 
           current_address = start_address*2 + 0.0 # Dirección en bytes
 
-          @serializable.attr_config.each do |attr, attr_options|
+          @serializable.attr_config.each do |attr_options|
+            attr_name = attr_options[:name]
             byte = current_address.floor
             bit = (current_address.modulo(1)*8).round
 
@@ -222,9 +229,9 @@ module ActiveModel
             end
 
             if attr_options[:type] == :nest
-              serialized_values["#{attr}"] = result_deserialized
+              serialized_values["#{attr_name}"] = result_deserialized
             else
-              serialized_values["#{attr}"] = result_deserialized.count>1 ? result_deserialized : result_deserialized.first
+              serialized_values["#{attr_name}"] = result_deserialized.count>1 ? result_deserialized : result_deserialized.first
             end
             current_address = (byte+bit/8.0)+var.size
           end
@@ -243,7 +250,7 @@ module ActiveModel
 
           current_address = 0.0 # Dirección en bytes
 
-          @serializable.attr_config.each do |attr_name, attr_options|
+          @serializable.attr_config.each do |attr_options|
             var = attr_options[:coder].new(attr_options.merge(parent: @serializable))
 
             byte = current_address.floor
@@ -269,7 +276,6 @@ module ActiveModel
                 end
               end
             end
-
             current_address = (byte+bit/8.0)+var.size
           end
           current_address-start_address
@@ -286,10 +292,7 @@ module ActiveModel
       #   => [98, 111, 98, 0, 0, 0, 0, 0, 0, 0, 22, 0, 1]
       #
       def to_bytes(options = {}, &block)
-        default_options = {
-            :align => true,
-        }
-        options = default_options.deep_merge(options)
+        options = self.serialize_options_global.deep_merge(options)
         if block_given?
             yield self
         end
@@ -341,10 +344,7 @@ module ActiveModel
       # @yield code block to execute after deserialization
       #
       def from_bytes(buffer, options = {}, &block)
-        default_options = {
-            :align => true
-        }
-        options = default_options.deep_merge(options)
+        options = self.serialize_options_global.deep_merge(options)
         retVal = Serializer.new(self, options).load buffer
         
         if block_given?
@@ -361,10 +361,7 @@ module ActiveModel
       end
 
       def size(options = {})
-        default_options = {
-            :align => true
-        }
-        options = default_options.deep_merge(options)
+        options = self.serialize_options_global.deep_merge(options)
         Serializer.new(self, options).size
       end
 
