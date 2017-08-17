@@ -2,7 +2,7 @@ module DataTypes
 
   class BaseType
 
-    attr_accessor :raw_value, :bit_length, :type, :sign, :count, :length, :value, :name, :parent
+    attr_accessor :raw_value, :bit_length, :type, :sign, :count, :length, :value, :name, :parent, :endianess
 
     def initialize(options = {})
       @default_value = options[:default_value].nil? ? 0 : options[:default_value]
@@ -16,6 +16,7 @@ module DataTypes
       @block = options[:block]
       @name = options[:name]
       @parent = options[:parent]
+      @endianess = options[:endianess] || :little
     end
 
     def to_s

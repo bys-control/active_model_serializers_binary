@@ -17,7 +17,8 @@ module ActiveModel
         class_attribute :serialize_options_global
         self.attr_config = []
         self.serialize_options_global = {
-          align: false    # Don't align data to byte/word/dword boundary
+          align: false,    # Don't align data to byte/word/dword boundary
+          endianess: :little
         }
 
         def attributes
@@ -61,53 +62,107 @@ module ActiveModel
         # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
         def serialize_options( attr_name, coder, count=1, length=1, virtual=false, &block )
           self.attr_config.push({:coder => coder, :count => count, :length => length, :block => block, :name => attr_name.to_s, :virtual => virtual})
+          if virtual==true
+            attr_accessor attr_name
+          end
         end
 
         def serialize_attribute_options( attr_name, options, &block )
           self.attr_config.push(options.merge({:name => attr_name.to_s, block: block }))
+          if options[:virtual]==true
+            attr_accessor attr_name
+          end
         end       
 
         def int8( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Int8}), &block
         end
 
         def int16( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Int16}), &block
         end
 
+        def int16le( attr_name, options = {}, &block )
+          int16( attr_name, options.merge({endianess: :little}), &block )
+        end
+
+        def int16be( attr_name, options = {}, &block )
+          int16( attr_name, options.merge({endianess: :big}), &block )
+        end
+
         def int32( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Int32}), &block
         end
 
+        def int32le( attr_name, options = {}, &block )
+          int32( attr_name, options.merge({endianess: :little}), &block )
+        end
+
+        def int32be( attr_name, options = {}, &block )
+          int16( attr_name, options.merge({endianess: :big}), &block )
+        end
+
         def uint8( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::UInt8}), &block
         end
 
         def uint16( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::UInt16}), &block
         end
 
+        def uint16le( attr_name, options = {}, &block )
+          uint16( attr_name, options.merge({endianess: :little}), &block )
+        end
+
+        def uint16be( attr_name, options = {}, &block )
+          uint16( attr_name, options.merge({endianess: :big}), &block )
+        end
+
         def uint32( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::UInt32}), &block
         end
 
+        def uint32le( attr_name, options = {}, &block )
+          uint32( attr_name, options.merge({endianess: :little}), &block )
+        end
+
+        def uint32be( attr_name, options = {}, &block )
+          uint32( attr_name, options.merge({endianess: :big}), &block )
+        end       
+
         def bitfield( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::BitField}), &block
         end
 
         def float32( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
+          serialize_attribute_options attr_name, options.merge({coder: DataTypes::Float32}), &block
+        end
+
+        def float64( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Float32}), &block
         end
 
         def char( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Char}), &block
         end
 
         def bool( attr_name, options = {}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Bool}), &block
         end
 
         def nest( attr_name, options={}, &block )
+          options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({type: :nest}), &block
         end
       end

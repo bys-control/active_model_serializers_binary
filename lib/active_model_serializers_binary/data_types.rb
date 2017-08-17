@@ -25,11 +25,19 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('s<*').unpack('C*')
+      if @endianess == :big
+        @raw_value = @value.pack('s>*').unpack('C*')
+      else
+        @raw_value = @value.pack('s<*').unpack('C*')
+      end
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack('s<*')
+      if @endianess == :big
+        self.value = check_raw_value(raw_value).pack('C*').unpack('s>*')
+      else
+        self.value = check_raw_value(raw_value).pack('C*').unpack('s<*')
+      end
       after_load
     end
   end
@@ -41,11 +49,19 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('l<*').unpack('C*')
+      if @endianess == :big
+        @raw_value = @value.pack('l>*').unpack('C*')
+      else
+        @raw_value = @value.pack('l<*').unpack('C*')
+      end
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack('l<*') if !value.nil?
+      if @endianess == :big
+        self.value = check_raw_value(raw_value).pack('C*').unpack('l>*') if !value.nil?
+      else
+        self.value = check_raw_value(raw_value).pack('C*').unpack('l<*') if !value.nil?
+      end
       after_load
     end
   end
@@ -57,12 +73,20 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('S<*').unpack('C*')
+      if @endianess == :big
+        @raw_value = @value.pack('S>*').unpack('C*')
+      else
+        @raw_value = @value.pack('S<*').unpack('C*')
+      end
     end
 
     def load(raw_value) 
       @raw_value = check_raw_value(raw_value)
-      self.value = @raw_value.pack('C*').unpack('S<*')
+      if @endianess == :big
+        self.value = @raw_value.pack('C*').unpack('S>*')
+      else
+        self.value = @raw_value.pack('C*').unpack('S<*')
+      end
       after_load
     end
   end
@@ -74,11 +98,19 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('L<*').unpack('C*')
+      if @endianess == :big
+        @raw_value = @value.pack('L>*').unpack('C*')
+      else
+        @raw_value = @value.pack('L<*').unpack('C*')
+      end
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack('L<*') if !value.nil?
+      if @endianess == :big
+        self.value = check_raw_value(raw_value).pack('C*').unpack('L>*') if !value.nil?
+      else
+        self.value = check_raw_value(raw_value).pack('C*').unpack('L<*') if !value.nil?
+      end
       after_load
     end
   end
@@ -176,11 +208,43 @@ module DataTypes
 
     def dump(value=nil)
       before_dump( value )
-      @raw_value = @value.pack('e*').unpack('C*')
+      if @endianess == :big
+        @raw_value = @value.pack('g*').unpack('C*')
+      else
+        @raw_value = @value.pack('e*').unpack('C*')
+      end
     end
 
     def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack('e*') if !value.nil?
+      if @endianess == :big
+        self.value = check_raw_value(raw_value).pack('C*').unpack('g*') if !value.nil?
+      else
+        self.value = check_raw_value(raw_value).pack('C*').unpack('e*') if !value.nil?
+      end
+      after_load
+    end
+  end
+
+  class Float64 < BaseType
+    def initialize(options = {})
+      super options.merge :bit_length => 64, :sign => nil, :default_value => 0.0
+    end
+
+    def dump(value=nil)
+      before_dump( value )
+      if @endianess == :big
+        @raw_value = @value.pack('G*').unpack('C*')
+      else
+        @raw_value = @value.pack('E*').unpack('C*')
+      end
+    end
+
+    def load(raw_value)
+      if @endianess == :big
+        self.value = check_raw_value(raw_value).pack('C*').unpack('G*') if !value.nil?
+      else
+        self.value = check_raw_value(raw_value).pack('C*').unpack('E*') if !value.nil?
+      end
       after_load
     end
   end
