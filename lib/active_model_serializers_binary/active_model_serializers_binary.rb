@@ -165,6 +165,10 @@ module ActiveModel
           options = serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({type: :nest}), &block
         end
+
+        def endianess( type = :little )
+          serialize_options_global.merge!({endianess: type})
+        end
       end
 
       class Serializer #:nodoc:
