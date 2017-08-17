@@ -17,8 +17,8 @@ module ActiveModel
         class_attribute :serialize_options_global
         self.attr_config = []
         self.serialize_options_global = {
-          align: false,    # Don't align data to byte/word/dword boundary
-          endianess: :little
+          :align      => :dword,    # Align data to byte/word/dword boundary or none
+          :endianess  => :little    # Little-endian default byte ordering
         }
 
         def attributes
@@ -169,14 +169,79 @@ module ActiveModel
         def endianess( type = :little )
           serialize_options_global.merge!({endianess: type})
         end
+
+        def align( boundary = :dword )
+          serialize_options_global.merge!({align: boundary})
+        end
       end
 
       class Serializer #:nodoc:
-        #attr_reader :options
+        attr_accessor :start_address
 
         def initialize(serializable, options = nil)
           @serializable = serializable
           @options = options ? options.dup : {}
+          @current_address = 0
+          @start_address = 0
+          @current_byte = 0
+          @current_bit = 0
+        end
+
+        def current_address= (value)
+          @current_address = value
+          @current_byte = value.floor
+          @current_bit = (value.modulo(1)*8).round
+        end
+
+        def current_address
+          @current_address
+        end
+
+        def current_byte= (value)
+          @current_byte = value
+          @current_address = (@current_byte+@current_bit/8.0)
+        end
+
+        def current_byte
+          @current_byte
+        end
+
+        def current_bit= (value)
+          @current_bit = value
+          @current_address = (@current_byte+@current_bit/8.0)
+        end
+
+        def current_bit
+          @current_bit
+        end
+
+        def align_data( attr_options, var )
+          # XXX: hay que sacar nest de acá
+          if !attr_options[:type].in? [:bitfield, :bool, :nest]
+            # Se posiciona al principio de un byte
+            if self.current_bit != 0
+              self.current_byte += 1
+              self.current_bit = 0
+            end
+            if @options[:align]==:dword
+              # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
+              if var.bit_length > 8 and (self.current_address + start_address).modulo(2) != 0
+                self.current_byte += 1
+                self.current_bit = 0
+              end
+              # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
+              if var.bit_length > 16 and (self.current_address + start_address).modulo(4) != 0
+                self.current_byte += 4-self.current_byte%4
+                self.current_bit = 0
+              end
+            elsif @options[:align]==:word
+              # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
+              if var.bit_length > 8 and (self.current_address + start_address).modulo(2) != 0
+                self.current_byte += 1
+                self.current_bit = 0
+              end
+            end
+          end
         end
 
         def dump
@@ -185,7 +250,8 @@ module ActiveModel
 
           buffer = [] # Data Buffer
           tmp_buffer = [] # Aux Data Buffer
-          current_address = start_address*2 + 0.0 # Address in bytes
+
+          self.current_address = self.start_address # Address in bytes
 
           @serializable.attr_config.each do |attr_options|
             attr_name = attr_options[:name]
@@ -197,46 +263,24 @@ module ActiveModel
               var = attr_options[:coder].new(var_value)
             end
 
-            byte = current_address.floor
-            bit = (current_address.modulo(1)*8).round
-
             tmp_buffer = var.dump
 
-            if @options[:align]
-              if !attr_options[:type].in? [:bitfield, :bool, :nest]
-                # Se posiciona al principio de un byte
-                if bit != 0
-                  byte += 1
-                  bit = 0
-                  current_address = (byte+bit/8.0)
-                end
-                # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-                if var.bit_length > 8 and current_address.modulo(2) != 0
-                  byte += 1
-                  bit = 0
-                end
-                # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-                if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
-                  byte += 4-byte%4
-                  bit = 0
-                end
-              end
-            end
+            align_data(attr_options, var) if @options[:align]
 
             # Si los datos ocupan mas de un byte concatena los arrays
             if !attr_options[:type].in? [:bitfield, :bool] and @options[:align]
-              buffer.insert(byte, tmp_buffer).flatten!
+              buffer.insert(self.current_byte, tmp_buffer).flatten!
             else # En caso de ser bits
               tmp_buffer.flatten!
               tmp_bits=tmp_buffer.pack('C*').unpack('b*').first.slice(0,var.size*8)
-              tmp_buffer=[tmp_bits.rjust(tmp_bits.length+bit,'0')].pack('b*').unpack('C*')
+              tmp_buffer=[tmp_bits.rjust(tmp_bits.length+self.current_bit,'0')].pack('b*').unpack('C*')
 
               tmp_buffer.each_with_index do |v,i|
-                buffer[byte+i] = (buffer[byte+i] || 0) | v
+                buffer[self.current_byte+i] = (buffer[self.current_byte+i] || 0) | v
               end
             end
 
-            current_address = (byte+bit/8.0)+var.size
+            self.current_address += var.size
           end
           buffer.map!{|el| el || 0}
         end
@@ -244,47 +288,26 @@ module ActiveModel
         #deserializado
         def load (buffer=[])
           serialized_values = {}
-          start_address = @options[:start_address] || 0
+          self.start_address = @options[:start_address] || 0
 
           buffer ||= [] # Buffer en bytes
           tmp_buffer = [] # Buffer temporal en bytes
 
-          current_address = start_address*2 + 0.0 # Dirección en bytes
+          self.current_address = self.start_address # Dirección en bytes
 
           @serializable.attr_config.each do |attr_options|
             attr_name = attr_options[:name]
-            byte = current_address.floor
-            bit = (current_address.modulo(1)*8).round
 
             var = attr_options[:coder].new(attr_options.merge(parent: @serializable)) #creo objeto del tipo de dato pasado
 
-            if @options[:align]
-              if !attr_options[:type].in? [:bitfield, :bool, :nest]
-                # Se posiciona al principio de un byte
-                if bit != 0
-                  byte += 1
-                  bit = 0
-                  current_address = (byte+bit/8.0)
-                end
-                # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-                if var.bit_length > 8 and current_address.modulo(2) != 0
-                  byte += 1
-                  bit = 0
-                end
-                # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-                if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
-                  byte += 4-byte%4
-                  bit = 0
-                end
-              end
-            end
+            align_data(attr_options, var) if @options[:align]
 
             # Si los datos ocupan mas de un byte, obtiene los bytes completos del buffer original
             if !attr_options[:type].in? [:bitfield, :bool] and @options[:align]
-              result_deserialized=var.load(buffer.slice(byte, var.size))
+              result_deserialized=var.load(buffer.slice(self.current_byte, var.size))
             else # En caso de ser bits
-              tmp_buffer = buffer.slice(byte, (var.size+bit/8.0).ceil)
-              result_deserialized=var.load([tmp_buffer.pack('C*').unpack('b*').first.slice(bit,var.size*8)].pack('b*').unpack('C*'))
+              tmp_buffer = buffer.slice(self.current_byte, (var.size+self.current_bit/8.0).ceil)
+              result_deserialized=var.load([tmp_buffer.pack('C*').unpack('b*').first.slice(self.current_bit,var.size*8)].pack('b*').unpack('C*'))
             end
 
             if attr_options[:type] == :nest
@@ -292,7 +315,7 @@ module ActiveModel
             else
               serialized_values["#{attr_name}"] = result_deserialized.count>1 ? result_deserialized : result_deserialized.first
             end
-            current_address = (byte+bit/8.0)+var.size
+            self.current_address += var.size
           end
 
           # Asigno los datos leidos
@@ -312,30 +335,9 @@ module ActiveModel
           @serializable.attr_config.each do |attr_options|
             var = attr_options[:coder].new(attr_options.merge(parent: @serializable))
 
-            byte = current_address.floor
-            bit = (current_address.modulo(1)*8).round
+            align_data(attr_options, var) if @options[:align]
 
-            if @options[:align]
-              if !attr_options[:type].in? [:bitfield, :bool, :nest]
-                # Se posiciona al principio de un byte
-                if bit != 0
-                  byte += 1
-                  bit = 0
-                  current_address = (byte+bit/8.0)
-                end
-                # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-                if var.bit_length > 8 and current_address.modulo(2) != 0
-                  byte += 1
-                  bit = 0
-                end
-                # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-                if var.bit_length > 16 and (current_address + start_address*2).modulo(4) != 0
-                  byte += 4-byte%4
-                  bit = 0
-                end
-              end
-            end
-            current_address = (byte+bit/8.0)+var.size
+            current_address += var.size
           end
           current_address-start_address
         end
