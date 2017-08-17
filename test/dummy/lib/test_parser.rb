@@ -8,8 +8,9 @@ class String
 end
 
 orig = Producto.new
+orig.silo = 0xFF7F
 orig.nombre = "AAAAAAAAAAAAAAAAAAAA"
-orig.tipo = Tipo.new({name:"BBBBBBBBBBBBBBBBBBBB", producto_id: 0x55AA})
+orig.tipo = Tipo.new({name:"BBBBBBBBBBBBBBBBBBBB", producto_id: 0xFF7F})
 
 puts 'Datos originales...'
 puts orig.inspect.green
