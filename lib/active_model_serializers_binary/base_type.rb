@@ -53,6 +53,8 @@ module DataTypes
               v.to_s[0...length]
             when :bool
               (v.in? [1, true]) ? true : false
+            when :nest
+              v
             else
               v.to_i
           end
