@@ -5,12 +5,12 @@
 #  id              :integer          not null, primary key
 #  uid             :integer
 #  silo            :integer
-#  nombre          :string(255)
+#  nombre          :string
 #  total_acumulado :integer
 #  bits1           :boolean
 #  bits2           :boolean
 #  ffloat          :float
-#  variable        :string(255)
+#  variable        :string
 #  created_at      :datetime
 #  updated_at      :datetime
 #
