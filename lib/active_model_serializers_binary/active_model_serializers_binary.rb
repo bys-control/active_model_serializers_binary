@@ -131,7 +131,7 @@ module ActiveModel
 
         def bitfield( attr_name, options = {}, &block )
           options = self.serialize_options_global.merge(options)
-          serialize_attribute_options attr_name, options.merge({coder: DataTypes::BitField}), &block
+          serialize_attribute_options attr_name, options.merge({coder: DataTypes::BitField, type: :bitfield}), &block
         end
 
         def float32( attr_name, options = {}, &block )
@@ -151,7 +151,7 @@ module ActiveModel
 
         def bool( attr_name, options = {}, &block )
           options = self.serialize_options_global.merge(options)
-          serialize_attribute_options attr_name, options.merge({coder: DataTypes::Bool}), &block
+          serialize_attribute_options attr_name, options.merge({coder: DataTypes::Bool, type: :bool}), &block
         end
 
         def nest( attr_name, options={}, &block )
