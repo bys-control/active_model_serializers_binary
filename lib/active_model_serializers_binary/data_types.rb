@@ -8,8 +8,8 @@ module DataTypes
     end
 
     def dump(value=nil)
-      before_dump( value ).pack('c*').unpack('C*')
-      @raw_value = @value
+      before_dump( value )
+      @raw_value = @value.pack('c*').unpack('C*')
     end
 
     def load(raw_value)

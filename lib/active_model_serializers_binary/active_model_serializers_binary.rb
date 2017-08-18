@@ -7,6 +7,7 @@ module ActiveModel
     # == Active Model Binary serializer
     module Binary
       extend ActiveSupport::Concern
+      include ActiveModel::Model
       include ActiveModel::Serialization
       include DataTypes
 
@@ -16,10 +17,7 @@ module ActiveModel
         class_attribute :attr_config
         class_attribute :serialize_options_global
         self.attr_config = []
-        self.serialize_options_global = {
-          :align      => :dword,    # Align data to byte/word/dword boundary or none
-          :endianess  => :little    # Little-endian default byte ordering
-        }
+        self.serialize_options_global = {}
 
         def attributes
           keys = self.attr_config.select{ |attr| attr[:virtual]==true }.map{ |attr| attr[:name] }
@@ -28,8 +26,8 @@ module ActiveModel
         end
 
         def initialize( *args )
-          super rescue super()
           initialize_serializer
+          super rescue super()
         end
 
         def initialize_serializer
@@ -37,6 +35,9 @@ module ActiveModel
         end
 
         after_initialize :initialize_serializer rescue nil
+
+        endianess :little
+        align     false
       end
 
       module ClassMethods
@@ -59,14 +60,6 @@ module ActiveModel
           end
         end
 
-        # todo: agrupar parametros en hash (rompe la compatibilidad hacia atras)
-        def serialize_options( attr_name, coder, count=1, length=1, virtual=false, &block )
-          self.attr_config.push({:coder => coder, :count => count, :length => length, :block => block, :name => attr_name.to_s, :virtual => virtual})
-          if virtual==true
-            attr_accessor attr_name
-          end
-        end
-
         def serialize_attribute_options( attr_name, options, &block )
           self.attr_config.push(options.merge({:name => attr_name.to_s, block: block }))
           if options[:virtual]==true
@@ -75,12 +68,12 @@ module ActiveModel
         end       
 
         def int8( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Int8}), &block
         end
 
         def int16( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Int16}), &block
         end
 
@@ -93,7 +86,7 @@ module ActiveModel
         end
 
         def int32( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Int32}), &block
         end
 
@@ -102,16 +95,16 @@ module ActiveModel
         end
 
         def int32be( attr_name, options = {}, &block )
-          int16( attr_name, options.merge({endianess: :big}), &block )
+          int32( attr_name, options.merge({endianess: :big}), &block )
         end
 
         def uint8( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::UInt8}), &block
         end
 
         def uint16( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::UInt16}), &block
         end
 
@@ -124,7 +117,7 @@ module ActiveModel
         end
 
         def uint32( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::UInt32}), &block
         end
 
@@ -137,41 +130,41 @@ module ActiveModel
         end       
 
         def bitfield( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::BitField}), &block
         end
 
         def float32( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Float32}), &block
         end
 
         def float64( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
-          serialize_attribute_options attr_name, options.merge({coder: DataTypes::Float32}), &block
+          options = self.serialize_options_global.merge(options)
+          serialize_attribute_options attr_name, options.merge({coder: DataTypes::Float64}), &block
         end
 
         def char( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Char}), &block
         end
 
         def bool( attr_name, options = {}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Bool}), &block
         end
 
         def nest( attr_name, options={}, &block )
-          options = serialize_options_global.merge(options)
+          options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({type: :nest}), &block
         end
 
         def endianess( type = :little )
-          serialize_options_global.merge!({endianess: type})
+          self.serialize_options_global.merge!({endianess: type})
         end
 
-        def align( boundary = :dword )
-          serialize_options_global.merge!({align: boundary})
+        def align( boundary = false )
+          self.serialize_options_global.merge!({align: boundary})
         end
       end
 
@@ -220,25 +213,21 @@ module ActiveModel
           if !attr_options[:type].in? [:bitfield, :bool, :nest]
             # Se posiciona al principio de un byte
             if self.current_bit != 0
-              self.current_byte += 1
-              self.current_bit = 0
+              self.current_address = self.current_address.ceil
             end
             if @options[:align]==:dword
               # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-              if var.bit_length > 8 and (self.current_address + start_address).modulo(2) != 0
+              if var.bit_length > 8 and (self.current_address + self.start_address).modulo(2) != 0
                 self.current_byte += 1
-                self.current_bit = 0
               end
               # Si el dato es una palabra doble, alinea los datos en la siguiente palabra par
-              if var.bit_length > 16 and (self.current_address + start_address).modulo(4) != 0
+              if var.bit_length > 16 and (self.current_address + self.start_address).modulo(4) != 0
                 self.current_byte += 4-self.current_byte%4
-                self.current_bit = 0
               end
             elsif @options[:align]==:word
               # Si el dato es una palabra simple, alinea los datos en el siguiente byte par
-              if var.bit_length > 8 and (self.current_address + start_address).modulo(2) != 0
+              if var.bit_length > 8 and (self.current_address + self.start_address).modulo(2) != 0
                 self.current_byte += 1
-                self.current_bit = 0
               end
             end
           end
@@ -246,7 +235,7 @@ module ActiveModel
 
         def dump
           serializable_values = @serializable.serializable_hash(@options)
-          start_address = @options[:start_address] || 0
+          self.start_address = @options[:start_address] || 0
 
           buffer = [] # Data Buffer
           tmp_buffer = [] # Aux Data Buffer
@@ -328,7 +317,7 @@ module ActiveModel
         # Return size of object in bytes
         def size
           serializable_values = @serializable.serializable_hash(@options)
-          start_address = @options[:start_address] || 0
+          self.start_address = @options[:start_address] || 0
 
           current_address = 0.0 # Dirección en bytes
 
@@ -337,9 +326,9 @@ module ActiveModel
 
             align_data(attr_options, var) if @options[:align]
 
-            current_address += var.size
+            self.current_address += var.size
           end
-          current_address-start_address
+          self.current_address-self.start_address
         end
 
       end #close class serializer
