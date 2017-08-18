@@ -48,7 +48,7 @@ module DataTypes
           default_value
         else
           case type
-            when :float32
+            when :float32, :float64
               v.to_f
             when :char
               v.to_s[0...length]
