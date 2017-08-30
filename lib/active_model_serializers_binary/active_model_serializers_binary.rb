@@ -25,8 +25,8 @@ module ActiveModel
         end
 
         def initialize( *args )
-          initialize_serializer
           super rescue super()
+          initialize_serializer
         end
 
         def initialize_serializer
