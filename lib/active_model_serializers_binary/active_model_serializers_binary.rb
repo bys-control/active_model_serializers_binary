@@ -7,7 +7,6 @@ module ActiveModel
     # == Active Model Binary serializer
     module Binary
       extend ActiveSupport::Concern
-      include ActiveModel::Model
       include ActiveModel::Serialization
       include DataTypes
 
@@ -37,7 +36,7 @@ module ActiveModel
         after_initialize :initialize_serializer rescue nil
 
         endianess :little
-        align     false
+        align     :dword
       end
 
       module ClassMethods

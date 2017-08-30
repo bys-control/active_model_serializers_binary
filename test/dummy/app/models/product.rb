@@ -1,5 +1,6 @@
 class Product
 	include ActiveModel::Serializers::Binary
+	include ActiveModel::Model # This must not be included when serializing ActiveRecord classes
 
 	endianess :big
 	align :dword
