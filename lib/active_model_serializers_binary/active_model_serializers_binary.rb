@@ -341,9 +341,9 @@ module ActiveModel
       #   => [98, 111, 98, 0, 0, 0, 0, 0, 0, 0, 22, 0, 1]
       #
       def to_bytes(options = {}, &block)
-        options = self.serialize_options_global.deep_merge(options)
+        options = self.serialize_options_global.merge(options)
         if block_given?
-            yield self
+            yield self, options
         end
         Serializer.new(self, options).dump
       end
@@ -393,11 +393,11 @@ module ActiveModel
       # @yield code block to execute after deserialization
       #
       def from_bytes(buffer, options = {}, &block)
-        options = self.serialize_options_global.deep_merge(options)
+        options = self.serialize_options_global.merge(options)
         retVal = Serializer.new(self, options).load buffer
         
         if block_given?
-          yield self
+          yield self, options
         end
         retVal
       end
@@ -410,7 +410,7 @@ module ActiveModel
       end
 
       def size(options = {})
-        options = self.serialize_options_global.deep_merge(options)
+        options = self.serialize_options_global.merge(options)
         Serializer.new(self, options).size
       end
 
