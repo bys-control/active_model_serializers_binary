@@ -24,5 +24,5 @@ class Product
 	float64 :float64
 	char :char
 	bool :bool
-	nest :type, coder: Type
+	#nest :type, coder: Type
 end

@@ -26,9 +26,9 @@ orig.uint32be = 1;
 orig.bitfield = 1;
 orig.float32 = 1;
 orig.float64 = 1;
-orig.char = "A";
+orig.char = "Ñ";
 orig.bool = 1;
-orig.type = Type.new({product_id: 1, name: "ABCDEFGHIJKLMNOPQRST"})
+#orig.type = Type.new({product_id: 1, name: "ABCDEFGHIJKLMNOPQRST"})
 
 puts 'Datos originales...'
 puts orig.inspect.green

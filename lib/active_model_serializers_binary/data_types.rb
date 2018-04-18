@@ -174,13 +174,17 @@ module DataTypes
       super options.merge :bit_length => 8, :sign => nil, :default_value => "\x0"
     end
 
-    def dump(value=nil)
+    EXTENDED_CHARACTERS = ["Ç","ü","é","â","ä","à","å","ç","ê","ë","è","ï","î","ì","Ä","Å","É","æ","Æ","ô","ö","ò","û","ù","ÿ","Ö","Ü","ø","£","Ø","×","ƒ","á","í","ó","ú","ñ","Ñ","ª","º","¿","®","¬","½","¼","¡","«","»","░","▒","▓","│","┤","Á","Â","À","©","╣","║","╗","╝","¢","¥","┐","└","┴","┬","├","─","┼","ã","Ã","╚","╔","╩","╦","╠","═","╬","¤","ð","Ð","Ê","Ë","È","ı","Í","Î","Ï","┘","┌","█","▄","¦","Ì","▀","Ó","ß","Ô","Ò","õ","Õ","µ","þ","Þ","Ú","Û","Ù","ý","Ý","¯","´","≡","±","‗","¾","¶","§","÷","¸","°","¨","·","¹","³","²","■"," "]
+    ASCII_TO_UTF8=["",('?'*31).split(''),(32..126).to_a.pack("U*").split(''),"?", EXTENDED_CHARACTERS].flatten
+
+    def dump(value=nil) # to bytes
       before_dump( value )
-      @raw_value = @value.map{|v| v.ljust(@length, @default_value).slice(0,@length).unpack('C*')}
+      @raw_value = @value.map{|v| v.ljust(@length, @default_value).slice(0,@length)}.first.split("").map{|x| x=="\u0000" ? 0 : ASCII_TO_UTF8.index(x)}
+      @raw_value
     end
 
-    def load(raw_value)
-      self.value = check_raw_value(raw_value).pack('C*').unpack("Z#{@length}") if !value.nil?
+    def load(raw_value) # from bytes            
+      self.value = check_raw_value(raw_value).map{|x| ASCII_TO_UTF8[x]}.join[0...@length] if !value.nil?
       after_load
     end
   end
