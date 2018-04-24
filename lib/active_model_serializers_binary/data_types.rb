@@ -183,8 +183,15 @@ module DataTypes
       @raw_value
     end
 
-    def load(raw_value) # from bytes            
-      self.value = check_raw_value(raw_value).map{|x| ASCII_TO_UTF8[x]}.join[0...@length] if !value.nil?
+    def load(raw_value) # from bytes       
+      if !value.nil?
+        characters = []
+        check_raw_value(raw_value).each do |x|
+          break if x == 0
+          characters << ASCII_TO_UTF8[x]
+        end
+        self.value = characters.join[0...@length] unless characters.empty?
+      end
       after_load
     end
   end
