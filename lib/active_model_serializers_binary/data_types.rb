@@ -190,7 +190,7 @@ module DataTypes
           break if x == 0
           characters << ASCII_TO_UTF8[x]
         end
-        self.value = characters.join[0...@length] unless characters.empty?
+        self.value = characters.empty? ? "" : characters.join[0...@length]
       end
       after_load
     end
