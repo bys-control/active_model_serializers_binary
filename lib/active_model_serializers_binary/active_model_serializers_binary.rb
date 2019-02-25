@@ -49,7 +49,11 @@ module ActiveModel
             true
           else
             attr_name = attr[:name].to_s
-            if !instance.class.column_names.include? attr_name
+            if (instance.class.respond_to? :column_names) && (!instance.class.column_names.include? attr_name)
+              attr[:virtual] = true
+              attr_accessor attr_name
+              true
+            elsif !instance.respond_to? attr_name
               attr[:virtual] = true
               attr_accessor attr_name
               true
