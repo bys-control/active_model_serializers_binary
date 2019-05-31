@@ -364,8 +364,11 @@ module ActiveModel
 
       def to_words(options = {}, &block)
         data = to_bytes(options, &block)
-        byte_count = (data.count/2.0).ceil*2
-        data.fill(0, data.count...byte_count).pack('C*').unpack('v*')
+        data.push(0) if data.count.odd?
+        if serialize_options_global==:big
+          data.pack('C*').unpack('S>*')
+        else
+          data.pack('C*').unpack('S<*')
       end
 
       # Sets the model +attributes+ from an Binary string. Returns +self+.
@@ -417,7 +420,10 @@ module ActiveModel
       alias_method :load, :from_bytes
 
       def from_words(buffer = [], options = {}, &block)
-        data = buffer.pack('v*').unpack('C*')
+        if serialize_options_global==:big
+          data = buffer.pack('S>*').unpack('C*')
+        else
+          data = buffer.pack('S<*').unpack('C*')
         from_bytes(data, options, &block)
       end
 
