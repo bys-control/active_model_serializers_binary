@@ -377,6 +377,7 @@ module ActiveModel
           data.pack('C*').unpack('S>*')
         else
           data.pack('C*').unpack('S<*')
+        end
       end
 
       # Sets the model +attributes+ from an Binary string. Returns +self+.
@@ -432,6 +433,7 @@ module ActiveModel
           data = buffer.pack('S>*').unpack('C*')
         else
           data = buffer.pack('S<*').unpack('C*')
+        end
         from_bytes(data, options, &block)
       end
 
