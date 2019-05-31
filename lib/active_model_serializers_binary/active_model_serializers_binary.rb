@@ -155,6 +155,14 @@ module ActiveModel
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Float64}), &block
         end
 
+        def float64le( attr_name, options = {}, &block )
+          float64( attr_name, options.merge({endianess: :little}), &block )
+        end        
+
+        def float64be( attr_name, options = {}, &block )
+          float64( attr_name, options.merge({endianess: :big}), &block )
+        end        
+
         def char( attr_name, options = {}, &block )
           options = self.serialize_options_global.merge(options)
           serialize_attribute_options attr_name, options.merge({coder: DataTypes::Char}), &block
