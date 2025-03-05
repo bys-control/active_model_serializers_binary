@@ -373,7 +373,7 @@ module ActiveModel
       def to_words(options = {}, &block)
         data = to_bytes(options, &block)
         data.push(0) if data.count.odd?
-        if self.serialize_options_global==:big
+        if self.serialize_options_global[:endianess]==:big
           data.pack('C*').unpack('S>*')
         else
           data.pack('C*').unpack('S<*')
@@ -429,7 +429,7 @@ module ActiveModel
       alias_method :load, :from_bytes
 
       def from_words(buffer = [], options = {}, &block)
-        if self.serialize_options_global==:big
+        if self.serialize_options_global[:endianess]==:big
           data = buffer.pack('S>*').unpack('C*')
         else
           data = buffer.pack('S<*').unpack('C*')
