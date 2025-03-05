@@ -1,7 +1,7 @@
-require 'test_helper'
+require "test_helper"
 
 class ActiveModelSerializersBinaryTest < ActiveSupport::TestCase
-  test "truth" do
-    assert_kind_of Module, ActiveModelSerializersBinary
+  test "it has a version number" do
+    assert ActiveModelSerializersBinary::VERSION
   end
 end

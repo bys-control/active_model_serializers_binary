@@ -49,7 +49,11 @@ module ActiveModel
             true
           else
             attr_name = attr[:name].to_s
-            if !instance.class.try(:column_names).try(:include?, attr_name) && !instance.respond_to? attr_name
+            if (instance.class.respond_to? :column_names) && (!instance.class.column_names.include? attr_name)
+              attr[:virtual] = true
+              attr_accessor attr_name
+              true
+            elsif !instance.respond_to? attr_name
               attr[:virtual] = true
               attr_accessor attr_name
               true
@@ -249,7 +253,7 @@ module ActiveModel
         end
 
         def dump
-          serializable_values = @serializable.serializable_hash(@options)
+          serializable_values = @serializable.attributes
           self.start_address = @options[:start_address] || 0
 
           buffer = [] # Data Buffer
@@ -331,7 +335,7 @@ module ActiveModel
 
         # Return size of object in bytes
         def size
-          serializable_values = @serializable.serializable_hash(@options)
+          serializable_values = @serializable.attributes
           self.start_address = @options[:start_address] || 0
 
           current_address = 0.0 # Dirección en bytes
